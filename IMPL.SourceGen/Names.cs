@@ -1,6 +1,4 @@
-﻿using IMPL.Contracts;
-
-namespace IMPL.SourceGen;
+﻿namespace IMPL.SourceGen;
 
 internal static class Names
 {

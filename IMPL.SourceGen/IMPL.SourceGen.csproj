@@ -67,6 +67,7 @@
     <ItemGroup>
         <Using Include="Microsoft.CodeAnalysis" />
         <Using Include="IMPL.Contracts" />
+        <Using Include="Jay.SourceGen" />
         <Using Include="Jay.SourceGen.Coding" />
     </ItemGroup>
 </Project>

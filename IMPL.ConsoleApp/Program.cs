@@ -8,7 +8,7 @@ Console.ReadLine();
 
 
 [Implement]
-public interface ITestInterface : IEquatable<ITestInterface>
+public interface ITestInterface
 {
-    int Id { get; init; }
+
 }

@@ -1,4 +1,5 @@
-﻿
+﻿using System.Reflection;
+
 namespace Jay.SourceGen;
 
 public sealed class AttributeArgsCollection : IReadOnlyCollection<KeyValuePair<string, object>>
@@ -50,6 +51,42 @@ public sealed class AttributeArgsCollection : IReadOnlyCollection<KeyValuePair<s
         _args = args;
     }
 
+    public AttributeArgsCollection(CustomAttributeData attrData)
+    {
+        var args = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
+
+        var ctorArgs = attrData.ConstructorArguments;
+        var ctorArgsLen = ctorArgs.Count;
+        if (ctorArgsLen > 0)
+        {
+            var ctorParams = attrData.Constructor.GetParameters();
+            Debug.Assert(ctorArgsLen == ctorParams.Length);
+            for (var i = 0; i < ctorArgsLen; i++)
+            {
+                string name = ctorParams[i].Name;
+                Debug.Assert(args.ContainsKey(name) == false);
+                object? value = ctorArgs[i].Value;
+                args[name] = value;
+            }
+        }
+
+        var namedArgs = attrData.NamedArguments;
+        var namedArgsLen = namedArgs.Count;
+        if (namedArgsLen > 0)
+        {
+            for (var i = 0; i < namedArgsLen; i++)
+            {
+                var arg = namedArgs[i];
+                string name = arg.MemberName;
+                Debug.Assert(args.ContainsKey(name) == false);
+                object? value = arg.TypedValue.Value;
+                args[name] = value;
+            }
+        }
+
+        _args = args;
+    }
+
     public bool TryGetValue(
         [AllowNull, NotNullWhen(true)] string? name,
         [MaybeNullWhen(false)] out object? value)
@@ -80,4 +117,20 @@ public sealed class AttributeArgsCollection : IReadOnlyCollection<KeyValuePair<s
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => _args.GetEnumerator();
+
+    public override bool Equals(object? obj)
+    {
+        return obj is AttributeArgsCollection aac &&
+            this.SequenceEqual(aac);
+    }
+
+    public override int GetHashCode()
+    {
+        Hasher hasher = new();
+        foreach (var pair in _args)
+        {
+            hasher.Add(pair);
+        }
+        return hasher.ToHashCode();
+    }
 }

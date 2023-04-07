@@ -1,14 +1,8 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
-
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Text;
 
 using Jay.SourceGen.Extensions;
-using System.Data;
-using System.Reflection;
 
 namespace IMPL.SourceGen;
 
