@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net7.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Configurations>Debug;Release;Attach</Configurations>
+    </PropertyGroup>
+
+    <!-- Attach is also Debug -->
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Attach|AnyCPU'">
+        <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
+    </PropertyGroup>
+
+    <!-- Contracts Projects -->
+    <ItemGroup>
+        <ProjectReference Include="..\IMPL.Contracts\IMPL.Contracts.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
+
+    </ItemGroup>
+
+
+    <!-- Source Generator Projects-->
+    <ItemGroup>
+        <ProjectReference Include="..\IMPL.SourceGen\IMPL.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
+    <!-- Other Projects -->
+    <ItemGroup>
+         <ProjectReference Include="..\Jay.SourceGen\Jay.SourceGen.csproj" 
+                           OutputItemType="Analyzer" 
+                           ReferenceOutputAssembly="true" 
+                           PrivateAssets="all" />
+    </ItemGroup>
+</Project>
