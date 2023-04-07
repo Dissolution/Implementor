@@ -262,6 +262,15 @@ public sealed partial class CodeBuilder : IDisposable
     public CodeBuilder AppendLine(string? str) => Append(str).NewLine();
     public CodeBuilder AppendLine(scoped ReadOnlySpan<char> text) => Append(text).NewLine();
 
+    #region Formatting
+
+    /* We support custom Format strings!
+     * lc - lowercase
+     * uc - UPPERCASE
+     * cc - CamelCase
+     * pc - pascalCase
+     * 
+     */
 
     private void WriteFormatLine(ReadOnlySpan<char> format, object?[] args)
     {
@@ -411,7 +420,7 @@ public sealed partial class CodeBuilder : IDisposable
             object? arg = args[index];
 
             // Append this arg, allows for overridden behavior
-            Value(arg, itemFormat);
+            this.AppendValue(arg, itemFormat);
 
             // Continue parsing the rest of the format string.
         }
@@ -450,6 +459,113 @@ public sealed partial class CodeBuilder : IDisposable
     }
 
 
+    public CodeBuilder AppendValue<T>([AllowNull] T? value)
+    {
+        switch (value)
+        {
+            case null:
+            {
+                return this;
+            }
+            case CBA codeBuilderAction:
+            {
+                return IndentAwareAction(codeBuilderAction);
+            }
+            case Delegate del:
+            {
+                // Check for CBA compat
+                CBA? codeBuilderAction;
+                try
+                {
+                    codeBuilderAction = Delegate.CreateDelegate(typeof(CBA), del.Target, del.Method) as CBA;
+                }
+                catch (Exception ex)
+                {
+                    // Cannot cast
+                    Debugger.Break();
+                    // fallthrough
+                    break;
+                }
+
+                if (codeBuilderAction is not null)
+                {
+                    return IndentAwareAction(codeBuilderAction);
+                }
+
+                // Cannot cast, fallthrough
+                break;
+            }
+            case string str:
+            {
+                return Append(str);
+            }
+            case IFormattable:
+            {
+                return Append(((IFormattable)value).ToString());
+            }
+            case IEnumerable enumerable:
+            {
+                return Enumerate(enumerable.Cast<object?>(), static (w, v) => w.AppendValue<object?>(v));
+            }
+            default:
+            {
+                // fallthrough
+                break;
+            }
+        }
+
+        // Default
+        return Append(value.ToString());
+    }
+
+    public CodeBuilder AppendValue<T>([AllowNull] T? value,
+        string? format,
+        IFormatProvider? provider = default)
+    {
+        if (value is null) return this;
+        if (string.IsNullOrEmpty(format)) return AppendValue<T>(value);
+
+        string? str;
+
+        if (string.Equals(format, "lc", StringComparison.OrdinalIgnoreCase))
+        {
+            return Append(value.ToString().ToLower());
+        }
+        else if (string.Equals(format, "UC", StringComparison.OrdinalIgnoreCase))
+        {
+            return Append(value.ToString().ToUpper());
+        }
+        else if (string.Equals(format, "CC", StringComparison.OrdinalIgnoreCase))
+        {
+            str = value.ToString();
+            var alloc = this.Allocate(str.Length);
+            alloc[0] = char.ToUpper(str[0]);
+            TextHelper.CopyTo(str[1..], alloc[1..]);
+            return this;
+        }
+        else if (string.Equals(format, "pC", StringComparison.OrdinalIgnoreCase))
+        {
+            str = value.ToString();
+            var alloc = this.Allocate(str.Length);
+            alloc[0] = char.ToLower(str[0]);
+            TextHelper.CopyTo(str[1..], alloc[1..]);
+            return this;
+        }
+        else if (value is IFormattable)
+        {
+            str = ((IFormattable)value).ToString(format, provider);
+        }
+        else
+        {
+            str = value.ToString();
+        }
+
+        return Append(str);
+    }
+
+
+    #endregion
+
     public CodeBuilder NewLine()
     {
         return Append(_newLineIndent);
@@ -463,7 +579,7 @@ public sealed partial class CodeBuilder : IDisposable
         return this;
     }
 
-    internal CodeBuilder IndentAwareAppend(CBA codeBuilderAction)
+    internal CodeBuilder IndentAwareAction(CBA codeBuilderAction)
     {
         var oldIndent = _newLineIndent;
         var currentIndent = CurrentLine.ToString();
@@ -473,65 +589,7 @@ public sealed partial class CodeBuilder : IDisposable
         return this;
     }
 
-    public CodeBuilder Value<T>(
-       [AllowNull] T value,
-       string? format = default,
-       IFormatProvider? provider = default
-   )
-    {
-        switch (value)
-        {
-            case null:
-            {
-                return this;
-            }
-            case CBA cba:
-            {
-                return IndentAwareAppend(cba);
-            }
-            case string str:
-            {
-                return Append(str);
-            }
-            case IFormattable formattable:
-            {
-                return Append(formattable.ToString(format, provider));
-            }
-            case IEnumerable enumerable:
-            {
-                format ??= ",";
-                return Delimit(
-                    format,
-                    enumerable.Cast<object?>(),
-                    (w, v) => w.Value(v, default, provider)
-                );
-            }
-            case Delegate del:
-            {
-                // Check for CBA compat
-                var method = del.Method;
-                if (method.ReturnType != typeof(void)) break;
-                var methodParams = method.GetParameters();
-                if (methodParams.Length != 1 || methodParams[0].ParameterType != typeof(CodeBuilder)) break;
 
-                // Convert into CBA
-                CBA? cba = Delegate.CreateDelegate(typeof(CBA), del.Target, del.Method) as CBA;
-                if (cba is not null)
-                {
-                    return IndentAwareAppend(cba);
-                }
-                // Cannot cast, fallthrough
-                break;
-            }
-            default:
-            {
-                break;
-            }
-        }
-
-        var valueType = value.GetType();
-        return Append(value.ToString());
-    }
 
     public CodeBuilder Code(NonFormattableString code)
     {
@@ -736,7 +794,7 @@ public sealed partial class CodeBuilder : IDisposable
     }
 
 
-    public CodeBuilder EnumerateAppend<T>(IEnumerable<T>? values) => Enumerate(values, static (cb, v) => cb.Value(v));
+    public CodeBuilder EnumerateAppend<T>(IEnumerable<T>? values) => Enumerate(values, static (cb, v) => cb.AppendValue(v));
     #endregion
 
     #region Delimit
@@ -798,12 +856,12 @@ public sealed partial class CodeBuilder : IDisposable
 
     public CodeBuilder DelimitAppend<T>(CBA? delimitAction, IEnumerable<T>? values)
     {
-        return Delimit(delimitAction, values, static (b, v) => b.Value(v));
+        return Delimit(delimitAction, values, static (b, v) => b.AppendValue(v));
     }
 
     public CodeBuilder DelimitAppend<T>(string? delimiter, IEnumerable<T>? values)
     {
-        return Delimit(delimiter, values, static (b, v) => b.Value(v));
+        return Delimit(delimiter, values, static (b, v) => b.AppendValue(v));
     }
 
     public CodeBuilder LineDelimit<T>(IEnumerable<T>? values, CBA<T>? delimitedValueAction)
@@ -813,7 +871,7 @@ public sealed partial class CodeBuilder : IDisposable
 
     public CodeBuilder LineDelimitAppend<T>(IEnumerable<T>? values)
     {
-        return Delimit(static b => b.NewLine(), values, static (cb, v) => cb.Value(v));
+        return Delimit(static b => b.NewLine(), values, static (cb, v) => cb.AppendValue(v));
     }
     #endregion
 

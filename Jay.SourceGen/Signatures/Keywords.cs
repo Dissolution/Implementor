@@ -1,4 +1,5 @@
-﻿using Jay.SourceGen.Enums;
+﻿using Jay.SourceGen.Coding;
+using Jay.SourceGen.Enums;
 
 using System.Reflection;
 
@@ -23,7 +24,7 @@ internal static class KeywordsExtensions
     }
 }
 
-internal static class KeywordUtil
+public static class KeywordUtil
 {
     public static Keywords FromSymbol(ISymbol symbol)
     {
@@ -79,5 +80,11 @@ internal static class KeywordUtil
                 throw new ArgumentException("", nameof(member));
         }
         return keywords;
+    }
+
+    public static void Write(Keywords keywords, CodeBuilder codeBuilder)
+    {
+        var flags = keywords.GetFlags();
+        codeBuilder.Delimit(" ", flags, static (cb,f) => cb.AppendValue(f, "lc"));
     }
 }

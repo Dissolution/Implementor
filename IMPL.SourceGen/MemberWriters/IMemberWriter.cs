@@ -37,6 +37,8 @@ public interface IInterfaceGenerator
 
 public class BackingFieldWriter : IMemberWriter
 {
+    public static BackingFieldWriter Instance {get;}= new();
+
     public bool CanWriteMember(MemberSig member)
     {
         return member is FieldSig && member.Name.StartsWith("_");
@@ -44,7 +46,17 @@ public class BackingFieldWriter : IMemberWriter
 
     public void WriteMember(IWorld world, MemberSig member, CodeBuilder code)
     {
-        
+        code.AppendValue(member.Access, "lc");
+        if (member.Instic == Instic.Instance)
+        {
+            code.Append(' ');
+        }
+        else
+        {
+            code.Append(" static ");
+        }
+        KeywordUtil.Write(member.Keywords, code);
+        code.Append(' ').Append(member.Name).AppendLine(';');        
     }
 }
 
@@ -102,6 +114,9 @@ public class PropertyGenerator : IMemberGenerator
             FullName = names.FullName,
         };
 
-        yield return new SigWriter()
+        yield return new SigWriter(backingField, BackingFieldWriter.Instance);
+
+        // Property
+        yield return new SigWriter(property, )
     }
 }
