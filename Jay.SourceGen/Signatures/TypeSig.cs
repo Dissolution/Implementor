@@ -25,8 +25,6 @@ public sealed class TypeSig : MemberSig, IEquatable<TypeSig>, IEquatable<ITypeSy
     public TypeSig(ITypeSymbol typeSymbol) : base(typeSymbol)
     {
         this.MemberType = MemberTypes.TypeInfo;
-        this.Name = typeSymbol.Name;
-        this.FullName = typeSymbol.GetFullName();
         this.CanBeNull = !typeSymbol.IsValueType;
         switch (typeSymbol.TypeKind)
         {
@@ -53,7 +51,6 @@ public sealed class TypeSig : MemberSig, IEquatable<TypeSig>, IEquatable<ITypeSy
     public TypeSig(Type type) : base(type)
     {
         this.MemberType = MemberTypes.TypeInfo;
-        this.Name = type.Name;
         this.FullName = type.FullName;
         this.CanBeNull = !type.IsValueType;
         if (type.IsValueType)

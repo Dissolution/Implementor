@@ -1,10 +1,8 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using IMPL.SourceGen.Scratch2;
+
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 using System.Diagnostics;
-
-using Jay.SourceGen.Extensions;
-using Jay.SourceGen.Signatures;
-using IMPL.SourceGen.MemberWriters;
 
 namespace IMPL.SourceGen;
 
@@ -245,8 +243,10 @@ public sealed class ImplementationGenerator : IIncrementalGenerator
                     Members = memberSigs,
                 };
 
-                // Create the implementation source code
-                SourceCode sourceCode = SpecGen.DoThing(implSpec);
+                // Create the implementation
+                var implementation = new Implementer(implSpec);
+
+                SourceCode sourceCode = implementation.Implement();
 
                 // Add it to the source output
                 sourceProductionContext.AddSource(sourceCode.FileName, sourceCode.Code);

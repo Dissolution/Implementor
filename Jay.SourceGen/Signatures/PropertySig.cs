@@ -1,9 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-
-using System.Reflection;
-using System.Runtime.CompilerServices;
-
-namespace Jay.SourceGen.Signatures;
+﻿namespace Jay.SourceGen.Signatures;
 
 public sealed class PropertySig : MemberSig, IEquatable<PropertySig>, IEquatable<IPropertySymbol>, IEquatable<PropertyInfo>
 {
@@ -115,7 +110,7 @@ public sealed class PropertySig : MemberSig, IEquatable<PropertySig>, IEquatable
     {
         return $$"""
             [{{string.Join(", ", Attributes)}}]
-            {{Visibility}} {{Instic}} {{Keywords}} {{FullName}} {{{(HasGet ? " get;" : "")}}{{(HasSet ? " set;" : HasInit ? " init;" : "")}}}
+            {{Visibility}} {{Instic}} {{Keywords}} {{FullName}} {{{(GetMethod is not null ? " get;" : "")}}{{(SetMethod is not null ? " set;" : "")}}}
             """;
     }
 }

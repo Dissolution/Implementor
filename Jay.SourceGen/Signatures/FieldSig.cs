@@ -17,7 +17,7 @@ public sealed class FieldSig : MemberSig, IEquatable<FieldSig>, IEquatable<IFiel
         return !left.Equals(right);
     }
 
-    public TypeSig FieldType { get; }
+    public TypeSig FieldType { get; set;}
 
     public FieldSig(IFieldSymbol fieldSymbol)
         : base(fieldSymbol)

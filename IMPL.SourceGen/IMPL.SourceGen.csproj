@@ -66,8 +66,15 @@
     <!-- Global Usings -->
     <ItemGroup>
         <Using Include="Microsoft.CodeAnalysis" />
+        <Using Include="System.Runtime.CompilerServices" />
+        <Using Include="System.Reflection" />        
         <Using Include="IMPL.Contracts" />
         <Using Include="Jay.SourceGen" />
         <Using Include="Jay.SourceGen.Coding" />
+        <Using Include="Jay.SourceGen.Enums" />
+        <Using Include="Jay.SourceGen.Signatures" />
+        <Using Include="Jay.SourceGen.Text" />
+        <Using Include="Jay.SourceGen.Extensions" />
+        
     </ItemGroup>
 </Project>

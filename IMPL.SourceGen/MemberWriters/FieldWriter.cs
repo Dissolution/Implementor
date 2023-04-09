@@ -1,18 +1,22 @@
-﻿using Jay.SourceGen.Signatures;
+﻿//using Jay.SourceGen.Signatures;
 
-namespace IMPL.SourceGen.MemberWriters;
+//namespace IMPL.SourceGen.MemberWriters;
 
-public sealed class FieldWriter : MemberWriter<FieldSig>
-{
-    public static FieldWriter Default { get; } = new();
+//public sealed class FieldWriter : MemberSigWriter<FieldSig>
+//{
+//    public FieldWriter(FieldSig fieldSig)
+//        : base(fieldSig)
+//    {
 
-    public override void Write(FieldSig field, CodeBuilder codeBuilder)
-    {
-        codeBuilder
-           .AppendValue(field.Visibility, "lc")
-           .AppendIf(field.Instic == Instic.Instance, " ", " static ")
-           .AppendKeywords(field.Keywords)
-           .Append(field.Name)
-           .AppendLine(';');
-    }
-}
+//    }
+
+//    public override void Write(CodeBuilder codeBuilder)
+//    {
+//        codeBuilder
+//           .AppendValue(Member.Visibility, "lc")
+//           .AppendIf(Member.Instic == Instic.Instance, " ", " static ")
+//           .AppendKeywords(Member.Keywords)
+//           .Append(Member.Name)
+//           .AppendLine(';');
+//    }
+//}

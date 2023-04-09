@@ -2,6 +2,7 @@
 using Jay.SourceGen.Enums;
 
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 [Flags]
 public enum Keywords
@@ -13,6 +14,7 @@ public enum Keywords
     Partial = 1 << 3,
     Readonly = 1 << 4,
     Init = 1 << 5,
+    Required = 1 << 6,
 }
 
 internal static class KeywordsExtensions
@@ -59,6 +61,15 @@ public static class KeywordUtil
             if (fieldSymbol.IsReadOnly)
                 keywords |= Keywords.Readonly;
         }
+        if (symbol is IPropertySymbol propertySymbol)
+        {
+            if (propertySymbol.IsReadOnly)
+                keywords |= Keywords.Readonly;
+            if (propertySymbol.IsRequired)
+                keywords |= Keywords.Required;
+            if (propertySymbol.SetMethod?.IsInitOnly == true)
+                keywords |= Keywords.Init;
+        }
         return keywords;
     }
 
@@ -79,6 +90,8 @@ public static class KeywordUtil
             {
                 keywords |= FromMember(property.GetMethod);
                 keywords |= FromMember(property.SetMethod);
+                if (property.GetCustomAttribute<RequiredMemberAttribute>() != null)
+                    keywords |= Keywords.Required;
                 break;
             }
             case EventInfo @event:

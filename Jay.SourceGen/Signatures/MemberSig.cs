@@ -7,7 +7,7 @@ namespace Jay.SourceGen.Signatures;
 public abstract class MemberSig :
     IEquatable<MemberSig>, IEquatable<ISymbol>, IEquatable<MemberInfo>
 {
-     public static MemberSig Create(ISymbol symbol)
+    public static MemberSig Create(ISymbol symbol)
     {
         switch (symbol)
         {
@@ -16,7 +16,7 @@ public abstract class MemberSig :
             case IPropertySymbol property:
                 return new PropertySig(property);
             //case IEventSymbol @event:
-                //return new EventSig(@event);
+            //return new EventSig(@event);
             case IMethodSymbol method:
                 return new MethodSig(method);
             default:
@@ -33,8 +33,10 @@ public abstract class MemberSig :
             case PropertyInfo property:
                 return new PropertySig(property);
             //case EventInfo @event:
-                //return new EventSig(@event);
-            case MethodBase method:
+            //return new EventSig(@event);
+            case ConstructorInfo ctor:
+                return new MethodSig(ctor);
+            case MethodInfo method:
                 return new MethodSig(method);
             default:
                 throw new NotImplementedException();
@@ -50,23 +52,30 @@ public abstract class MemberSig :
     public Instic Instic { get; set; } = default;
     public Keywords Keywords { get; set; } = default;
 
+    public string? Namespace { get; set; } = null;
     public string Name { get; set; } = null!;
     public string FullName { get; set; } = null!;
 
     protected MemberSig(ISymbol symbol)
     {
-        Attributes = symbol.GetAttributes().Select(static attr => new AttributeSig(attr)).ToList();
-        // MemberType set by implementing class
-        Visibility = symbol.DeclaredAccessibility.ToVisibility();
-        Instic = symbol.IsStatic ? Instic.Static : Instic.Instance;
-        Keywords = KeywordUtil.FromSymbol(symbol);
+        this.Attributes = symbol.GetAttributes().Select(static attr => new AttributeSig(attr)).ToList();
+        this.Visibility = symbol.DeclaredAccessibility.ToVisibility();
+        this.Instic = symbol.IsStatic ? Instic.Static : Instic.Instance;
+        this.Keywords = KeywordUtil.FromSymbol(symbol);
+        this.Namespace = symbol.GetFQNamespace();
+        this.Name = symbol.Name;
+        this.FullName = symbol.GetFullName();
     }
     protected MemberSig(MemberInfo member)
     {
-        Attributes = member.GetCustomAttributesData().Select(static attrData => new AttributeSig(attrData)).ToList();
-        Visibility = member.GetVisibility();
-        Instic = member.IsStatic() ? Instic.Static : Instic.Instance;
-        Keywords = KeywordUtil.FromMember(member);
+        this.Attributes = member.GetCustomAttributesData().Select(static attrData => new AttributeSig(attrData)).ToList();
+        this.Visibility = member.GetVisibility();
+        this.Instic = member.IsStatic() ? Instic.Static : Instic.Instance;
+        this.Keywords = KeywordUtil.FromMember(member);
+        this.MemberType = member.MemberType;
+        this.Namespace = member.DeclaringType?.Namespace;
+        this.Name = member.Name;
+        this.FullName = Namespace is null ? this.Name : $"{Namespace}.{Name}";
     }
     protected MemberSig()
     {
