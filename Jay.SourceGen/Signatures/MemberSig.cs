@@ -15,10 +15,12 @@ public abstract class MemberSig :
                 return new FieldSig(field);
             case IPropertySymbol property:
                 return new PropertySig(property);
-            //case IEventSymbol @event:
-            //return new EventSig(@event);
+            case IEventSymbol @event:
+                return new EventSig(@event);
             case IMethodSymbol method:
                 return new MethodSig(method);
+            case ITypeSymbol type:
+                return new TypeSig(type);
             default:
                 throw new NotImplementedException();
         }
@@ -32,12 +34,14 @@ public abstract class MemberSig :
                 return new FieldSig(field);
             case PropertyInfo property:
                 return new PropertySig(property);
-            //case EventInfo @event:
-            //return new EventSig(@event);
+            case EventInfo @event:
+                return new EventSig(@event);
             case ConstructorInfo ctor:
                 return new MethodSig(ctor);
             case MethodInfo method:
                 return new MethodSig(method);
+            case Type type:
+                return new TypeSig(type);
             default:
                 throw new NotImplementedException();
         }

@@ -1,4 +1,7 @@
-﻿using System.Diagnostics;
+﻿using IMPL.SourceGen.MemberCodes;
+using IMPL.SourceGen.Modifiers;
+
+using System.Diagnostics;
 
 namespace IMPL.SourceGen.MemberWriters;
 
@@ -24,14 +27,13 @@ public class Implementer
         // Same for events
         EventWriter = SimpleEventSigWriter.Instance;
         // Setup ctor + methodwriters
-        Members = new()
-        {
-            new(PropertyConstructorWriter.MemberPos, new PropertyConstructorWriter()),
-        };
+        Members = new();
+        AddMember(new PropertyConstructorsCode());
 
         ImplModifiers = new()
         {
             new BackingFieldModifier(),
+            new DisposableModifier(),
         };
 
 
@@ -42,12 +44,12 @@ public class Implementer
         }
 
         // Pre-register non-interface specific
-        this.ImplModifiers.Where(im => im is not IInterfaceImplModifer).Consume(im => im.PreRegister(this));
+        this.ImplModifiers.Where(im => im is not IInterfaceImplementationModifier).Consume(im => im.PreRegister(this));
 
         // Scan interfaces for writer overrides
         foreach (var interfaceType in spec.InterfaceTypes)
         {
-            var handler = this.ImplModifiers.FirstOrDefault(io => io is IInterfaceImplModifer iim && iim.AppliesTo(interfaceType));
+            var handler = this.ImplModifiers.FirstOrDefault(io => io is IInterfaceImplementationModifier iim && iim.AppliesTo(interfaceType));
             if (handler is not null)
             {
                 handler.PreRegister(this);
@@ -56,9 +58,9 @@ public class Implementer
     }
 
 
-    public void AddMember(MemberPos memberPos, ICodeWriter codeWriter)
+    public void AddMember(IMemberCode memberCode)
     {
-        Members.Add((memberPos, codeWriter));
+        Members.Add((memberCode.Pos, memberCode));
     }
 
     public void AddMember(MemberSig memberSig)
@@ -136,9 +138,9 @@ public class Implementer
 
                             foreach ((MemberPos pos, object? obj) in sectionMembers)
                             {
-                                if (obj is ICodeWriter codeWriter)
+                                if (obj is IMemberCode memberCode)
                                 {
-                                    codeWriter.Write(this, codeBuilder);
+                                    memberCode.Write(this, codeBuilder);
                                 }
                                 else if (obj is FieldSig fieldSig)
                                 {
@@ -162,7 +164,9 @@ public class Implementer
                                         continue;
                                     }
 
-                                    throw new NotImplementedException();
+                                    // Maybe handled by an interface Implementer?
+
+                                    //throw new NotImplementedException();
                                 }
                                 else
                                     Debugger.Break();

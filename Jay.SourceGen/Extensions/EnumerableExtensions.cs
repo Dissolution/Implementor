@@ -18,4 +18,14 @@ public static class EnumerableExtensions
             perValue(value);
         }
     }
+
+    public static T? OneOrDefault<T>(this IEnumerable<T>? source, T? fallback = default)
+    {
+        if (source is null) return fallback;
+        using var e = source.GetEnumerator();
+        if (!e.MoveNext()) return fallback;
+        T value = e.Current;
+        if (e.MoveNext()) return fallback;
+        return value;
+    }
 }

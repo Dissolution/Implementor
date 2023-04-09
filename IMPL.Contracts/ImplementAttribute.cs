@@ -1,7 +1,7 @@
 ﻿namespace IMPL.Contracts;
 
 [AttributeUsage(AttributeTargets.Interface | AttributeTargets.Struct | AttributeTargets.Class)]
-public class ImplementAttribute : Attribute
+public sealed class ImplementAttribute : Attribute
 {
     /// <summary>
     /// Specifies declaration keywords to be added to the implementation

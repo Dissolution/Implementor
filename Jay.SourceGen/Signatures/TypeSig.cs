@@ -44,6 +44,11 @@ public sealed class TypeSig : MemberSig, IEquatable<TypeSig>, IEquatable<ITypeSy
                 this.ObjType = ObjType.Class;
                 break;
             }
+            case TypeKind.Delegate:
+            {
+                this.ObjType = ObjType.Delegate;
+                break;
+            }
             default:
                 throw new InvalidOperationException();
         }
@@ -62,10 +67,14 @@ public sealed class TypeSig : MemberSig, IEquatable<TypeSig>, IEquatable<ITypeSy
         {
             this.ObjType = ObjType.Interface;
         }
+        else if (typeof(Delegate).IsAssignableFrom(type))
+        {
+            this.ObjType = ObjType.Delegate;
+        }
         else if (type.IsClass)
         {
             this.ObjType = ObjType.Class;
-        }
+        }        
         else
         {
             throw new InvalidOperationException();

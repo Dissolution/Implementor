@@ -244,6 +244,13 @@ public sealed class ImplementationGenerator : IIncrementalGenerator
                     baseTypeSymbol = baseTypeSymbol.BaseType;
                 }
 
+                // If we started with an interface
+                if (typeSymbol.TypeKind == TypeKind.Interface)
+                {
+                    // Clean up 'abstract' off of everything's keywords
+                    memberSigs.ForEach(s => s.Keywords &= ~Keywords.Abstract);
+                }
+
                 // If we are still building an interface, we'll change it!
                 if (typeSig.ObjType == ObjType.Interface)
                 {

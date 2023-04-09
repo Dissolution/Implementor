@@ -25,31 +25,11 @@ internal static class KeywordsExtensions
             keywords.GetFlags(),
             static (cb, v) => cb.Append(v.ToString().ToLower()).Append(' '));
     }
-}
 
-public static class KeywordUtil
-{
-    public static bool TryParse(string? input, out Keywords keywords)
-    {
-        keywords = default;
-        if (string.IsNullOrEmpty(input)) return false;
-        if (Enum.TryParse<Keywords>(input, true, out keywords))
-            return true;
-
-        var split = input!.Split(new char[]{' ', ',', '|'}, StringSplitOptions.RemoveEmptyEntries);
-        foreach (var segment in split)
-        {
-            if (Enum.TryParse<Keywords>(segment.Trim(), true, out var keyword))
-                keywords |= keyword;
-            else
-                return false;
-        }
-        return true;
-    }
-
-    public static Keywords FromSymbol(ISymbol symbol)
+    public static Keywords GetKeywords(this ISymbol? symbol)
     {
         Keywords keywords = default;
+        if (symbol is null) return keywords;
         if (symbol.IsVirtual)
             keywords |= Keywords.Virtual;
         if (symbol.IsAbstract)
@@ -73,7 +53,7 @@ public static class KeywordUtil
         return keywords;
     }
 
-    public static Keywords FromMember(MemberInfo? member)
+    public static Keywords GetKeywords(this MemberInfo? member)
     {
         Keywords keywords = default;
         switch (member)
@@ -88,16 +68,16 @@ public static class KeywordUtil
             }
             case PropertyInfo property:
             {
-                keywords |= FromMember(property.GetMethod);
-                keywords |= FromMember(property.SetMethod);
+                keywords |= GetKeywords(property.GetMethod);
+                keywords |= GetKeywords(property.SetMethod);
                 if (property.GetCustomAttribute<RequiredMemberAttribute>() != null)
                     keywords |= Keywords.Required;
                 break;
             }
             case EventInfo @event:
             {
-                keywords |= FromMember(@event.AddMethod);
-                keywords |= FromMember(@event.RemoveMethod);
+                keywords |= GetKeywords(@event.AddMethod);
+                keywords |= GetKeywords(@event.RemoveMethod);
                 break;
             }
             case MethodInfo method:
@@ -106,13 +86,19 @@ public static class KeywordUtil
                     keywords |= Keywords.Virtual;
                 if (method.IsAbstract)
                     keywords |= Keywords.Abstract;
-                
+
                 // Look for init for property set methods
                 var returnMods = method.ReturnParameter.GetRequiredCustomModifiers();
-                if (returnMods.Contains(typeof(System.Runtime.CompilerServices.IsExternalInit)))
+                if (returnMods.Contains(typeof(IsExternalInit)))
                 {
                     keywords |= Keywords.Init;
-                }           
+                }
+                break;
+            }
+            case Type type:
+            {
+                if (type.IsAbstract)
+                    keywords |= Keywords.Abstract;
                 break;
             }
             default:
@@ -120,6 +106,29 @@ public static class KeywordUtil
         }
         return keywords;
     }
+}
+
+public static class KeywordUtil
+{
+    public static bool TryParse(string? input, out Keywords keywords)
+    {
+        keywords = default;
+        if (string.IsNullOrEmpty(input)) return false;
+        if (Enum.TryParse<Keywords>(input, true, out keywords))
+            return true;
+
+        var split = input!.Split(new char[] { ' ', ',', '|' }, StringSplitOptions.RemoveEmptyEntries);
+        foreach (var segment in split)
+        {
+            if (Enum.TryParse<Keywords>(segment.Trim(), true, out var keyword))
+                keywords |= keyword;
+            else
+                return false;
+        }
+        return true;
+    }
+
+
 
     public static CodeBuilder AppendKeywords(this CodeBuilder codeBuilder, Keywords keywords)
     {

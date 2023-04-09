@@ -10,9 +10,12 @@ Console.ReadLine();
 
 
 [Implement(Name = "Tester", Declaration = "internal")]
-public interface ITestInterface
+public interface ITestInterface : IDisposable
 {
     int Id { get; }
+    string? Name { get; set; }
+
+    event EventHandler Exploded;
 }
 
 //[Implement]

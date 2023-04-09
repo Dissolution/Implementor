@@ -12,6 +12,7 @@ public sealed class SimpleEventSigWriter : IEventSigWriter
             .AppendKeywords(eventSig.Keywords)
             .Append(" event ")
             .Append(eventSig.EventType)
-            .Append(' ').Append(eventSig.Name).AppendLine(';');
+            .Append("? ")
+            .Append(eventSig.Name).AppendLine(';');
     }
 }

@@ -9,5 +9,7 @@ public enum ObjType
 
     Interface = 1 << 2 | Class,
 
-    Any = Struct | Class | Interface,
+    Delegate = 1 << 3 | Class,
+
+    Any = Struct | Class | Interface | Delegate,
 }
