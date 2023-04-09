@@ -1,5 +1,5 @@
-﻿using IMPL.SourceGen.Scratch2;
-
+﻿using IMPL.SourceGen.MemberWriters;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -110,6 +110,15 @@ public sealed class ImplementationGenerator : IIncrementalGenerator
 
                 // We have our starting typesig
                 var typeSig = new TypeSig(typeSymbol);
+                if (typeDeclaration.HasKeyword(SyntaxKind.PartialKeyword))
+                    typeSig.Keywords |= Keywords.Partial;
+
+                // Non-interfaces must be partial
+                if (typeSig.ObjType != ObjType.Interface)
+                {
+                    if (!typeSig.Keywords.HasFlag(Keywords.Partial))
+                        throw new InvalidOperationException("Source must be partial");
+                }
 
                 // Check for specifiers from the ImplementAttribute
                 var attrData = implementAttributeData.GetArgs();
@@ -235,7 +244,18 @@ public sealed class ImplementationGenerator : IIncrementalGenerator
                     baseTypeSymbol = baseTypeSymbol.BaseType;
                 }
 
+                // If we are still building an interface, we'll change it!
+                if (typeSig.ObjType == ObjType.Interface)
+                {
+                    typeSig.ObjType = ObjType.Class;
+                    typeSig.Keywords &= ~Keywords.Abstract;
+                    if (typeSig.Name == typeSymbol.Name)
+                    {
+                        typeSig.Name = typeSig.Name[1..];
+                    }
+                }
 
+                // Build our spec
                 var implSpec = new ImplSpec
                 {
                     ImplType = typeSig,

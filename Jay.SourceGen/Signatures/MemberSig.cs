@@ -62,7 +62,7 @@ public abstract class MemberSig :
         this.Visibility = symbol.DeclaredAccessibility.ToVisibility();
         this.Instic = symbol.IsStatic ? Instic.Static : Instic.Instance;
         this.Keywords = KeywordUtil.FromSymbol(symbol);
-        this.Namespace = symbol.GetFQNamespace();
+        this.Namespace = symbol.GetNamespace();
         this.Name = symbol.Name;
         this.FullName = symbol.GetFullName();
     }

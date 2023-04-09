@@ -1,4 +1,6 @@
-﻿namespace Jay.SourceGen.Signatures;
+﻿using System.Runtime.CompilerServices;
+
+namespace Jay.SourceGen.Signatures;
 
 public sealed class MethodSig : MemberSig, IEquatable<MethodSig>, IEquatable<IMethodSymbol>, IEquatable<MethodBase>
 {
@@ -25,6 +27,8 @@ public sealed class MethodSig : MemberSig, IEquatable<MethodSig>, IEquatable<IMe
         MemberType = MemberTypes.Method;
         ReturnType = new(methodSymbol.ReturnType);
         Parameters = methodSymbol.Parameters.Select(static p => new ParameterSig(p)).ToList();
+        if (methodSymbol.IsInitOnly)
+            this.Keywords |= Keywords.Init;
     }
 
     public MethodSig(MethodInfo methodInfo)
@@ -33,6 +37,10 @@ public sealed class MethodSig : MemberSig, IEquatable<MethodSig>, IEquatable<IMe
         MemberType = MemberTypes.Method;
         ReturnType = new(methodInfo.ReturnType);
         Parameters = methodInfo.GetParameters().Select(static p => new ParameterSig(p)).ToList();
+        
+        var retMods = methodInfo.ReturnParameter.GetRequiredCustomModifiers();
+        if (retMods.Contains(typeof(IsExternalInit)))
+            this.Keywords |= Keywords.Init;
     }
     public MethodSig(ConstructorInfo ctorInfo)
        : base(ctorInfo)

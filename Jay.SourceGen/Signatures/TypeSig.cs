@@ -24,6 +24,7 @@ public sealed class TypeSig : MemberSig, IEquatable<TypeSig>, IEquatable<ITypeSy
 
     public TypeSig(ITypeSymbol typeSymbol) : base(typeSymbol)
     {
+        this.Name = typeSymbol.ToString();
         this.MemberType = MemberTypes.TypeInfo;
         this.CanBeNull = !typeSymbol.IsValueType;
         switch (typeSymbol.TypeKind)
@@ -111,6 +112,6 @@ public sealed class TypeSig : MemberSig, IEquatable<TypeSig>, IEquatable<ITypeSy
 
     public override string ToString()
     {
-        return FullName;
+        return Name;
     }
 }

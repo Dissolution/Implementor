@@ -459,7 +459,7 @@ public sealed partial class CodeBuilder : IDisposable
     }
 
 
-    public CodeBuilder AppendValue<T>([AllowNull] T? value)
+    public CodeBuilder Append<T>([AllowNull] T? value)
     {
         switch (value)
         {
@@ -505,7 +505,7 @@ public sealed partial class CodeBuilder : IDisposable
             }
             case IEnumerable enumerable:
             {
-                return Enumerate(enumerable.Cast<object?>(), static (w, v) => w.AppendValue<object?>(v));
+                return Enumerate(enumerable.Cast<object?>(), static (w, v) => w.Append<object?>(v));
             }
             default:
             {
@@ -523,7 +523,7 @@ public sealed partial class CodeBuilder : IDisposable
         IFormatProvider? provider = default)
     {
         if (value is null) return this;
-        if (string.IsNullOrEmpty(format)) return AppendValue<T>(value);
+        if (string.IsNullOrEmpty(format)) return Append<T>(value);
 
         string? str;
 
@@ -794,7 +794,7 @@ public sealed partial class CodeBuilder : IDisposable
     }
 
 
-    public CodeBuilder EnumerateAppend<T>(IEnumerable<T>? values) => Enumerate(values, static (cb, v) => cb.AppendValue(v));
+    public CodeBuilder EnumerateAppend<T>(IEnumerable<T>? values) => Enumerate(values, static (cb, v) => cb.Append(v));
     #endregion
 
     #region Delimit
@@ -856,12 +856,12 @@ public sealed partial class CodeBuilder : IDisposable
 
     public CodeBuilder DelimitAppend<T>(CBA? delimitAction, IEnumerable<T>? values)
     {
-        return Delimit(delimitAction, values, static (b, v) => b.AppendValue(v));
+        return Delimit(delimitAction, values, static (b, v) => b.Append(v));
     }
 
     public CodeBuilder DelimitAppend<T>(string? delimiter, IEnumerable<T>? values)
     {
-        return Delimit(delimiter, values, static (b, v) => b.AppendValue(v));
+        return Delimit(delimiter, values, static (b, v) => b.Append(v));
     }
 
     public CodeBuilder LineDelimit<T>(IEnumerable<T>? values, CBA<T>? delimitedValueAction)
@@ -871,7 +871,7 @@ public sealed partial class CodeBuilder : IDisposable
 
     public CodeBuilder LineDelimitAppend<T>(IEnumerable<T>? values)
     {
-        return Delimit(static b => b.NewLine(), values, static (cb, v) => cb.AppendValue(v));
+        return Delimit(static b => b.NewLine(), values, static (cb, v) => cb.Append(v));
     }
     #endregion
 
