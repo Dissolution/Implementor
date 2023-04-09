@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using Microsoft.CodeAnalysis;
+
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace Jay.SourceGen.Signatures;
@@ -18,62 +20,43 @@ public sealed class PropertySig : MemberSig, IEquatable<PropertySig>, IEquatable
         return !left.Equals(right);
     }
 
-    public bool HasGet { get; } = false;
-    public bool HasSet { get; } = false;
-    public bool HasInit { get; } = false;
-
-    public TypeSig PropertyType { get; }
-    public IReadOnlyList<ParameterSig> Parameters { get; }
+    public TypeSig PropertyType { get; set;}
+    public IReadOnlyList<ParameterSig> Parameters { get; set;}
+    public MethodSig? GetMethod {get;set;} = null;
+    public MethodSig? SetMethod{get;set;} = null;
 
     public PropertySig(IPropertySymbol propertySymbol)
         : base(propertySymbol)
     {
-        MemberType = MemberTypes.Property;
-        PropertyType = new(propertySymbol.Type);
-        Parameters = propertySymbol.Parameters.Select(static p => new ParameterSig(p)).ToList();
+        this.MemberType = MemberTypes.Property;
+        this.PropertyType = new(propertySymbol.Type);
+        this.Parameters = propertySymbol.Parameters.Select(static p => new ParameterSig(p)).ToList();
 
         // Getter
         var getMethod = propertySymbol.GetMethod;
-        HasGet = getMethod is not null;
+        if (getMethod is not null)
+            this.GetMethod = new(getMethod);
         // Setter
         var setMethod = propertySymbol.SetMethod;
         if (setMethod is not null)
-        {
-            if (setMethod.IsInitOnly)
-            {
-                HasInit = true;
-            }
-            else
-            {
-                HasSet = true;
-            }
-        }
+            this.SetMethod = new(setMethod);
     }
 
     public PropertySig(PropertyInfo propertyInfo)
         : base(propertyInfo)
     {
-        MemberType = MemberTypes.Property;
-        PropertyType = new(propertyInfo.PropertyType);
-        Parameters = propertyInfo.GetIndexParameters().Select(static p => new ParameterSig(p)).ToList();
+        this.MemberType = MemberTypes.Property;
+        this.PropertyType = new(propertyInfo.PropertyType);
+        this.Parameters = propertyInfo.GetIndexParameters().Select(static p => new ParameterSig(p)).ToList();
 
         // Getter
         var getMethod = propertyInfo.GetMethod;
-        HasGet = getMethod is not null;
+        if (getMethod is not null)
+            this.GetMethod = new(getMethod);
         // Setter
         var setMethod = propertyInfo.SetMethod;
         if (setMethod is not null)
-        {
-            var customMods = setMethod.ReturnParameter.GetRequiredCustomModifiers();
-            if (customMods.Contains(typeof(IsExternalInit)))
-            {
-                HasInit = true;
-            }
-            else
-            {
-                HasSet = true;
-            }
-        }
+            this.SetMethod = new(setMethod);
     }
 
     public bool Equals(PropertySig? propertySig)
@@ -132,7 +115,7 @@ public sealed class PropertySig : MemberSig, IEquatable<PropertySig>, IEquatable
     {
         return $$"""
             [{{string.Join(", ", Attributes)}}]
-            {{Access}} {{Instic}} {{Keywords}} {{FullName}} {{{(HasGet ? " get;" : "")}}{{(HasSet ? " set;" : HasInit ? " init;" : "")}}}
+            {{Visibility}} {{Instic}} {{Keywords}} {{FullName}} {{{(HasGet ? " get;" : "")}}{{(HasSet ? " set;" : HasInit ? " init;" : "")}}}
             """;
     }
 }

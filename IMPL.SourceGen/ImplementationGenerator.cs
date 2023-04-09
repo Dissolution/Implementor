@@ -3,6 +3,8 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 
 using Jay.SourceGen.Extensions;
+using Jay.SourceGen.Signatures;
+using IMPL.SourceGen.MemberWriters;
 
 namespace IMPL.SourceGen;
 
@@ -37,7 +39,7 @@ public sealed class ImplementationGenerator : IIncrementalGenerator
         // Initial filter for things with our attribute
         var typeDeclarations = context.SyntaxProvider
              .ForAttributeWithMetadataName(
-                fullyQualifiedMetadataName: Names.ImplementAttr.FullName,
+                fullyQualifiedMetadataName: ImplementAttributeUtil.FullName,
                 predicate: static (syntaxNode, _) => syntaxNode is TypeDeclarationSyntax,
                 transform: static (ctx, _) => (TypeDeclarationSyntax)ctx.TargetNode)
              .Where(t => t is not null)!;
@@ -71,12 +73,12 @@ public sealed class ImplementationGenerator : IIncrementalGenerator
 
         // Load our attribute's symbol
         INamedTypeSymbol? attributeSymbol = compilation
-            .GetTypesByMetadataName(Names.ImplementAttr.FullName)
+            .GetTypesByMetadataName(ImplementAttributeUtil.FullName)
             .FirstOrDefault();
         if (attributeSymbol is null)
         {
             // Cannot!
-            throw new InvalidOperationException($"Could not load {nameof(INamedTypeSymbol)} for {Names.ImplementAttr.FullName}");
+            throw new InvalidOperationException($"Could not load {nameof(INamedTypeSymbol)} for {ImplementAttributeUtil.FullName}");
         }
 
         // As per several examples, we need a distinct list or a grouping on SyntaxTree
@@ -101,107 +103,166 @@ public sealed class ImplementationGenerator : IIncrementalGenerator
                 // ImplementAttribute
                 AttributeData? implementAttributeData = typeSymbol
                     .GetAttributes()
-                    .FirstOrDefault(attr => string.Equals(attr.AttributeClass?.GetFullName(), Names.ImplementAttr.FullName));
+                    .FirstOrDefault(attr => string.Equals(attr.AttributeClass?.GetFullName(), ImplementAttributeUtil.FullName));
 
                 if (implementAttributeData is null)
                 {
-                    throw new InvalidOperationException($"Could not get find our {nameof(ImplementAttribute)}");
+                    throw new InvalidOperationException($"Could not get find our {ImplementAttributeUtil.FullName}");
                 }
 
-                HashSet<INamedTypeSymbol> interfaces = new(SymbolEqualityComparer.Default);
-                if (typeDeclaration is InterfaceDeclarationSyntax)
-                    interfaces.Add(typeSymbol);
+                // We have our starting typesig
+                var typeSig = new TypeSig(typeSymbol);
 
-                HashSet<ISymbol> members = new(SymbolEqualityComparer.Default);
-                typeSymbol
-                    .GetMembers()
-                    .Consume(m => members.Add(m));
-                typeSymbol
-                    .AllInterfaces
-                    .SelectMany(interfaceSymbol =>
+                // Check for specifiers from the ImplementAttribute
+                var attrData = implementAttributeData.GetArgs();
+
+                // Name override?
+                if (attrData.TryGetValue(nameof(ImplementAttribute.Name), out string? name) && !string.IsNullOrWhiteSpace(name))
+                {
+                    if (typeSig.ObjType != ObjType.Interface)
+                        throw new InvalidOperationException("Name may only be specified on Interfaces");
+
+                    typeSig.Name = name!;
+                    typeSig.FullName = $"{typeSymbol.GetFQNamespace()}.{name}";
+                }
+
+                // Keywords override?
+                if (attrData.TryGetValue(nameof(ImplementAttribute.Declaration), out string? words))
+                {
+                    if (!ImplementAttributeUtil.TryParseDeclaration(words, out var typewords))
                     {
-                        interfaces.Add(interfaceSymbol);
-                        return interfaceSymbol.GetMembers();
-                    })
-                    .Consume(m => members.Add(m));
+                        throw new InvalidOperationException("Invalid Keywords");
+                    }
 
-                Debugger.Break();
+                    // Visibility
+                    if (typewords.Visibility != default)
+                    {
+                        // Always override interface
+                        if (typeSig.ObjType == ObjType.Interface)
+                        {
+                            typeSig.Visibility = typewords.Visibility;
+                        }
+                        // can override others if they didn't specify
+                        else if (typeSig.Visibility == default)
+                        {
+                            typeSig.Visibility = typewords.Visibility;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("cannot override existing visibility");
+                        }
+                    }
 
+                    // Instic
+                    if (typewords.Instic != default)
+                    {
+                        // Experimental!
+                        throw new NotImplementedException();
+                    }
+
+                    // Keywords
+                    if (typewords.Keywords != default)
+                    {
+                        // Always override interface
+                        if (typeSig.ObjType == ObjType.Interface)
+                        {
+                            typeSig.Keywords = typewords.Keywords;
+                        }
+                        // can override others if they didn't specify
+                        else if (typeSig.Keywords == default)
+                        {
+                            typeSig.Keywords = typewords.Keywords;
+                        }
+                        else
+                        {
+                            // Selectively implement!
+                            throw new NotImplementedException();
+                        }
+                    }
+
+                    // Objtype
+                    if (typewords.ObjType != default)
+                    {
+                        // Always override interface
+                        if (typeSig.ObjType == ObjType.Interface)
+                        {
+                            typeSig.ObjType = typewords.ObjType;
+                        }
+                        // can override others if they didn't specify
+                        else if (typeSig.ObjType == default)
+                        {
+                            typeSig.ObjType = typewords.ObjType;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("cannot override existing objtype");
+                        }
+                    }
+                }
+
+                // We now have a typesig, let's fill in the rest
+
+                // Members
+                var memberSigs = new List<MemberSig>();
+
+                // Interface Types
+                var interfaceSymbols = typeSymbol.AllInterfaces;
+                var interfaceSigs = new List<TypeSig>();
+
+                // if this type is an interface itself, add it as the 'most complex' (first) type
+                if (typeSymbol.TypeKind == TypeKind.Interface)
+                {
+                    interfaceSigs.Add(new TypeSig(typeSymbol));
+                    foreach (var memberSymbol in typeSymbol.GetMembers())
+                    {
+                        memberSigs.Add(MemberSig.Create(memberSymbol));
+                    }
+                }
+                // The rest
+                foreach (var interfaceSymbol in interfaceSymbols)
+                {
+                    interfaceSigs.Add(new TypeSig(interfaceSymbol));
+                    foreach (var memberSymbol in interfaceSymbol.GetMembers())
+                    {
+                        memberSigs.Add(MemberSig.Create(memberSymbol));
+                    }
+                }
+
+                // base types
+                var baseTypeSigs = new List<TypeSig>();
+                var baseTypeSymbol = typeSymbol.BaseType;
+                while (baseTypeSymbol is not null)
+                {
+                    baseTypeSigs.Add(new TypeSig(baseTypeSymbol));
+                    baseTypeSymbol = baseTypeSymbol.BaseType;
+                }
+
+
+                var implSpec = new ImplSpec
+                {
+                    ImplType = typeSig,
+                    InterfaceTypes = interfaceSigs,
+                    Members = memberSigs,
+                };
+
+                // Create the implementation source code
+                SourceCode sourceCode = SpecGen.DoThing(implSpec);
+
+                // Add it to the source output
+                sourceProductionContext.AddSource(sourceCode.FileName, sourceCode.Code);
             }
         }
-
     }
-
 }
 
-/*
-public sealed class GenerateInfo
+
+public sealed class ImplSpec
 {
-    public INamedTypeSymbol InterfaceTypeSymbol { get; }
-    
-    public required string ImplementationTypeName { get; init; }
-
-
-    public Visibility Visibility { get; set; } = Visibility.Public;
-    public MemberKeywords MemberKeywords { get; set; } = MemberKeywords.Sealed;
-    public ObjType ObjType { get; set; } = ObjType.Class;
-
-    public ImmutableArray<INamedTypeSymbol> Interfaces { get; set; }
-    public HashSet<MemberSig> Members { get; internal set;} = new();
-
-    public GenerateInfo(INamedTypeSymbol interfaceTypeSymbol)
-    {
-        this.InterfaceTypeSymbol = interfaceTypeSymbol;
-    }
-
-    public void GetLocals(
-        out string implementationTypeName, 
-        out string implementationVariableName)
-    {
-        implementationTypeName = this.ImplementationTypeName;
-        implementationVariableName = this.ImplementationTypeName.ToVariableName();
-    }
-
-    public bool HasInterface<TInterface>()
-        where TInterface : class
-    {
-        return this.Interfaces.Any(isym => isym.GetFQN() == typeof(TInterface).FullName);
-    }
-
-    public bool HasMember(
-        Instic instic,
-        Visibility visibility,
-        MemberType memberType,
-        string? name = null,
-        Func<TypeSig, bool>? returnType = null,
-        Func<IReadOnlyList<ParameterSig>, bool>? paramTypes = null)
-    {
-        foreach (var member in Members)
-        {
-            if (!member.Instic.HasFlag(instic)) continue;
-            if (!member.Visibility.HasFlag(visibility)) continue;
-            if (!member.MemberType.HasFlag(memberType)) continue;
-            if (!string.IsNullOrWhiteSpace(name))
-            {
-                if (!string.Equals(name, member.Name))
-                    continue;
-            }
-            if (returnType != null)
-            {
-                if (!returnType(member.ReturnType)) continue;
-            }
-            if (paramTypes != null)
-            {
-                if (!paramTypes(member.ParamTypes)) continue;
-            }
-            return true;
-        }
-        return false;
-    }
-
-    public IEnumerable<MemberSig> MembersWithAttribute(string attributeFQN)
-    {
-        return this.Members.Where(m => m.Attributes.Any(attr => attr.AttributeClass?.GetFQN() == attributeFQN));
-    }
+    public required TypeSig ImplType { get; init; }
+    public required IReadOnlyList<TypeSig> InterfaceTypes { get; init; }
+    public required IReadOnlyList<MemberSig> Members { get; init; }
 }
-*/
+
+
+
+

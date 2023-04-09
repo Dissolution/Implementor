@@ -20,12 +20,12 @@ public sealed class ParameterSig :
         return !left.Equals(right);
     }
 
-    public string Name { get; }
-    public TypeSig Type { get; }
+    public string Name { get; set;} = null!;
+    public TypeSig Type { get; set;} = null!;
 
-    public bool IsParams { get; }
-    public bool HasDefault { get; }
-    public object? Default { get; }
+    public bool IsParams { get; set; } = false;
+    public bool HasDefault { get; set;} = false;
+    public object? Default { get; set;} = null;
 
     public ParameterSig(IParameterSymbol parameterSymbol)
     {
@@ -57,6 +57,11 @@ public sealed class ParameterSig :
         {
             Default = null;
         }
+    }
+
+    public ParameterSig()
+    {
+
     }
 
     public bool Equals(ParameterSig? parameterSig)

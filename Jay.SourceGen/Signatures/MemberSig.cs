@@ -1,31 +1,72 @@
-﻿using System.Reflection;
+﻿using Jay.SourceGen.Enums;
+
+using System.Reflection;
 
 namespace Jay.SourceGen.Signatures;
 
 public abstract class MemberSig :
     IEquatable<MemberSig>, IEquatable<ISymbol>, IEquatable<MemberInfo>
 {
-    public IReadOnlyList<AttributeSig> Attributes { get; init; } = Array.Empty<AttributeSig>();
-    public required MemberTypes MemberType { get; init; }
+     public static MemberSig Create(ISymbol symbol)
+    {
+        switch (symbol)
+        {
+            case IFieldSymbol field:
+                return new FieldSig(field);
+            case IPropertySymbol property:
+                return new PropertySig(property);
+            //case IEventSymbol @event:
+                //return new EventSig(@event);
+            case IMethodSymbol method:
+                return new MethodSig(method);
+            default:
+                throw new NotImplementedException();
+        }
+    }
 
-    public Accessibility Access { get; init; } = default;
-    public Instic Instic { get; init; } = default;
-    public Keywords Keywords { get; init; } = default;
+    public static MemberSig Create(MemberInfo member)
+    {
+        switch (member)
+        {
+            case FieldInfo field:
+                return new FieldSig(field);
+            case PropertyInfo property:
+                return new PropertySig(property);
+            //case EventInfo @event:
+                //return new EventSig(@event);
+            case MethodBase method:
+                return new MethodSig(method);
+            default:
+                throw new NotImplementedException();
+        }
+    }
 
-    public required string Name { get; init; }
-    public required string FullName { get; init; }
+
+
+    public IReadOnlyList<AttributeSig> Attributes { get; set; } = Array.Empty<AttributeSig>();
+    public MemberTypes MemberType { get; set; }
+
+    public Visibility Visibility { get; set; } = default;
+    public Instic Instic { get; set; } = default;
+    public Keywords Keywords { get; set; } = default;
+
+    public string Name { get; set; } = null!;
+    public string FullName { get; set; } = null!;
 
     protected MemberSig(ISymbol symbol)
     {
         Attributes = symbol.GetAttributes().Select(static attr => new AttributeSig(attr)).ToList();
         // MemberType set by implementing class
-        Access = symbol.DeclaredAccessibility;
+        Visibility = symbol.DeclaredAccessibility.ToVisibility();
         Instic = symbol.IsStatic ? Instic.Static : Instic.Instance;
-
+        Keywords = KeywordUtil.FromSymbol(symbol);
     }
     protected MemberSig(MemberInfo member)
     {
         Attributes = member.GetCustomAttributesData().Select(static attrData => new AttributeSig(attrData)).ToList();
+        Visibility = member.GetVisibility();
+        Instic = member.IsStatic() ? Instic.Static : Instic.Instance;
+        Keywords = KeywordUtil.FromMember(member);
     }
     protected MemberSig()
     {
@@ -77,7 +118,7 @@ public abstract class MemberSig :
     {
         return $"""
             [{string.Join(", ", Attributes)}]
-            {Access} {Instic} {Keywords} {Name}
+            {Visibility} {Instic} {Keywords} {Name}
             """;
     }
 }

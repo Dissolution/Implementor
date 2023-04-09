@@ -91,7 +91,7 @@ public sealed class FieldSig : MemberSig, IEquatable<FieldSig>, IEquatable<IFiel
     {
         return $$"""
             [{{string.Join(", ", Attributes)}}]
-            {{Access}} {{Instic}} {{Keywords}} {{FullName}}
+            {{Visibility}} {{Instic}} {{Keywords}} {{FullName}}
             """;
     }
 }

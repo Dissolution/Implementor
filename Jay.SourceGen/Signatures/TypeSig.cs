@@ -1,7 +1,11 @@
-﻿namespace Jay.SourceGen.Signatures;
+﻿using System.Reflection;
 
-public sealed class TypeSig : IEquatable<TypeSig>, IEquatable<ITypeSymbol>, IEquatable<Type>
+namespace Jay.SourceGen.Signatures;
+
+public sealed class TypeSig : MemberSig, IEquatable<TypeSig>, IEquatable<ITypeSymbol>, IEquatable<Type>
 {
+    public static implicit operator TypeSig(Type type) => new TypeSig(type);
+
     public static bool operator ==(TypeSig? left, TypeSig? right)
     {
         if (ReferenceEquals(left, right)) return true;
@@ -15,22 +19,64 @@ public sealed class TypeSig : IEquatable<TypeSig>, IEquatable<ITypeSymbol>, IEqu
         return !left.Equals(right);
     }
 
-    public string Name { get; }
-    public string FullName { get; }
-    public bool CanBeNull { get; }
+    public ObjType ObjType { get; set; }
+    public bool CanBeNull { get; set; }
 
-    public TypeSig(ITypeSymbol typeSymbol)
+    public TypeSig(ITypeSymbol typeSymbol) : base(typeSymbol)
     {
-        Name = typeSymbol.Name;
-        FullName = typeSymbol.GetFullName();
-        CanBeNull = !typeSymbol.IsValueType;
+        this.MemberType = MemberTypes.TypeInfo;
+        this.Name = typeSymbol.Name;
+        this.FullName = typeSymbol.GetFullName();
+        this.CanBeNull = !typeSymbol.IsValueType;
+        switch (typeSymbol.TypeKind)
+        {
+            case TypeKind.Struct:
+            {
+                this.ObjType = ObjType.Struct;
+                break;
+            }
+            case TypeKind.Interface:
+            {
+                this.ObjType = ObjType.Interface;
+                break;
+            }
+            case TypeKind.Class:
+            {
+                this.ObjType = ObjType.Class;
+                break;
+            }
+            default:
+                throw new InvalidOperationException();
+        }
     }
 
-    public TypeSig(Type type)
+    public TypeSig(Type type) : base(type)
     {
-        Name = type.Name;
-        FullName = type.FullName;
-        CanBeNull = !type.IsValueType;
+        this.MemberType = MemberTypes.TypeInfo;
+        this.Name = type.Name;
+        this.FullName = type.FullName;
+        this.CanBeNull = !type.IsValueType;
+        if (type.IsValueType)
+        {
+            this.ObjType = ObjType.Struct;
+        }
+        else if (type.IsInterface)
+        {
+            this.ObjType = ObjType.Interface;
+        }
+        else if (type.IsClass)
+        {
+            this.ObjType = ObjType.Class;
+        }
+        else
+        {
+            throw new InvalidOperationException();
+        }
+    }
+
+    public TypeSig() : base()
+    {
+        this.MemberType = MemberTypes.TypeInfo;
     }
 
     public bool Equals(TypeSig? typeSig)
