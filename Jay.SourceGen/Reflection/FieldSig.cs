@@ -1,5 +1,7 @@
 ﻿using Jay.SourceGen.Coding;
 
+using Microsoft.CodeAnalysis;
+
 namespace Jay.SourceGen.Reflection;
 
 public sealed class FieldSig : MemberSig,
@@ -40,12 +42,13 @@ public sealed class FieldSig : MemberSig,
         return !left.Equals(right);
     }
 
+    [return: NotNullIfNotNull(nameof(fieldSymbol))]
     public static FieldSig? Create(IFieldSymbol? fieldSymbol)
     {
         if (fieldSymbol is null) return null;
         return new FieldSig(fieldSymbol);
     }
-
+    [return: NotNullIfNotNull(nameof(fieldInfo))]
     public static FieldSig? Create(FieldInfo? fieldInfo)
     {
         if (fieldInfo is null) return null;

@@ -520,6 +520,12 @@ public sealed partial class CodeBuilder : IDisposable
         return Append(value.ToString());
     }
 
+    public CodeBuilder Append<T>([AllowNull] T? value, Naming naming)
+    {
+        string? str = value?.ToString().WithNaming(naming);
+        return Append(str);
+    }
+
     public CodeBuilder Append<T>([AllowNull] T? value,
         string? format,
         IFormatProvider? provider = default)

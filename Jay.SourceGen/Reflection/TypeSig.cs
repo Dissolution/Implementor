@@ -1,4 +1,6 @@
-﻿namespace Jay.SourceGen.Reflection;
+﻿using Microsoft.CodeAnalysis;
+
+namespace Jay.SourceGen.Reflection;
 
 public sealed class TypeSig : MemberSig,
     IEquatable<TypeSig>, IEquatable<ITypeSymbol>, IEquatable<Type>
@@ -8,14 +10,12 @@ public sealed class TypeSig : MemberSig,
 
     public static bool operator ==(TypeSig? left, TypeSig? right)
     {
-        if (ReferenceEquals(left, right)) return true;
-        if (left is null || right is null) return false;
+        if (left is null) return right is null;
         return left.Equals(right);
     }
     public static bool operator !=(TypeSig? left, TypeSig? right)
     {
-        if (ReferenceEquals(left, right)) return false;
-        if (left is null || right is null) return true;
+        if (left is null) return right is not null;
         return !left.Equals(right);
     }
     public static bool operator ==(TypeSig? left, ITypeSymbol? right)
@@ -39,20 +39,21 @@ public sealed class TypeSig : MemberSig,
         return !left.Equals(right);
     }
 
+    [return: NotNullIfNotNull(nameof(typeSymbol))]
     public static TypeSig? Create(ITypeSymbol? typeSymbol)
     {
         if (typeSymbol is null) return null;
         return new TypeSig(typeSymbol);
     }
-
+    [return: NotNullIfNotNull(nameof(type))]
     public static TypeSig? Create(Type? type)
     {
         if (type is null) return null;
         return new TypeSig(type);
     }
 
-    public string? Namespace { get; set; }
-    public override string FullName { get; }
+    public string? Namespace { get; set; } = null;
+    public string? FullName { get; set; } = null;
 
     public TypeSig(ITypeSymbol typeSymbol)
         : base(SigType.Type, typeSymbol)
@@ -107,12 +108,22 @@ public sealed class TypeSig : MemberSig,
         return member is Type type && Equals(type);
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(Sig? signature)
+    {
+        return signature is TypeSig typeSig && Equals(typeSig);
+    }
+
+    public override bool Equals(object? obj)
     {
         if (obj is TypeSig typeSig) return Equals(typeSig);
         if (obj is ITypeSymbol typeSymbol) return Equals(typeSymbol);
         if (obj is Type type) return Equals(type);
         return false;
+    }
+
+    public override int GetHashCode()
+    {
+        return Hasher.Create(SigType.Type, FullName);
     }
 
     public override string ToString()

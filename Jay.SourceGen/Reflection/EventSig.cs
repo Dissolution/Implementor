@@ -39,7 +39,7 @@ public sealed class EventSig : MemberSig,
         return !left.Equals(right);
     }
 
-     [return: NotNullIfNotNull(nameof(eventSymbol))]
+    [return: NotNullIfNotNull(nameof(eventSymbol))]
     public static EventSig? Create(IEventSymbol? eventSymbol)
     {
         if (eventSymbol is null) return null;
@@ -130,7 +130,7 @@ public sealed class EventSig : MemberSig,
         return false;
     }
 
-        public override int GetHashCode()
+    public override int GetHashCode()
     {
         return Hasher.Create(SigType.Event, Name, EventType);
     }

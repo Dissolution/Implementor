@@ -53,7 +53,7 @@ public sealed class ParameterSig : Sig,
     public TypeSig? ParameterType { get; set; } = null;
     public bool HasDefaultValue { get; set; } = false;
     public object? DefaultValue { get; set; } = null;
-    // TODO: IsParams!
+    public bool IsParams {get;set;} = false;
 
     public ParameterSig()
         : base(SigType.Parameter)
@@ -74,6 +74,7 @@ public sealed class ParameterSig : Sig,
         {
             this.DefaultValue = parameterSymbol.ExplicitDefaultValue;
         }
+        this.IsParams = parameterSymbol.IsParams;
     }
 
     public ParameterSig(ParameterInfo parameterInfo)
@@ -89,6 +90,7 @@ public sealed class ParameterSig : Sig,
         {
             this.DefaultValue = parameterInfo.DefaultValue;
         }
+        this.IsParams = parameterInfo.GetCustomAttribute<ParamArrayAttribute>() != null;
     }
 
     public bool Equals(ParameterSig? parameterSig)
@@ -137,6 +139,6 @@ public sealed class ParameterSig : Sig,
 
     public override string ToString()
     {
-        return $"{ParameterType} {Name}{(HasDefaultValue ? $" = {DefaultValue}" : "")}";
+        return $"{(IsParams ? "params " : "")}{ParameterType} {Name}{(HasDefaultValue ? $" = {DefaultValue}" : "")}";
     }
 }
