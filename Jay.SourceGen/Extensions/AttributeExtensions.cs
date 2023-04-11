@@ -7,6 +7,11 @@ public static class AttributeExtensions
         return new AttributeArgsCollection(attributeData);
     }
 
+    public static AttributeArgsCollection GetArgs(this CustomAttributeData customAttributeData)
+    {
+        return new AttributeArgsCollection(customAttributeData);
+    }
+
     public static string? GetFullTypeName(this AttributeData attributeData)
     {
         return attributeData.AttributeClass?.GetFullName();
@@ -30,7 +35,7 @@ public static class AttributeExtensions
 
         return ret;
     }
-    
+
     public static AttributeData? FindByFQN(this ImmutableArray<AttributeData> attributes, string? attributeFQN)
     {
         for (int i = 0; i < attributes.Length; i++)

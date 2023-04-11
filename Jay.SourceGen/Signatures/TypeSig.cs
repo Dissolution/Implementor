@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace Jay.SourceGen.Signatures;
+﻿namespace Jay.SourceGen.Signatures;
 
 public sealed class TypeSig : MemberSig, IEquatable<TypeSig>, IEquatable<ITypeSymbol>, IEquatable<Type>
 {

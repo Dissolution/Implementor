@@ -1,7 +1,5 @@
 ﻿using Jay.SourceGen.Coding;
-using Jay.SourceGen.Enums;
 
-using System.Reflection;
 using System.Runtime.CompilerServices;
 
 [Flags]
@@ -133,6 +131,6 @@ public static class KeywordUtil
     public static CodeBuilder AppendKeywords(this CodeBuilder codeBuilder, Keywords keywords)
     {
         var flags = keywords.GetFlags();
-        return codeBuilder.Enumerate(flags, static (cb, f) => cb.AppendValue(f, "lc").Append(' '));
+        return codeBuilder.Enumerate(flags, static (cb, f) => cb.Append(f, "lc").Append(' '));
     }
 }

@@ -1,7 +1,4 @@
-﻿using Jay.SourceGen.Enums;
-using Jay.SourceGen.Signatures;
-
-namespace IMPL.SourceGen;
+﻿namespace IMPL.SourceGen;
 
 public record struct Typewords(Visibility Visibility, Instic Instic, Keywords Keywords, ObjType ObjType)
 {

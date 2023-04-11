@@ -1,8 +1,4 @@
-﻿using Jay.SourceGen.Enums;
-
-using System.Reflection;
-
-namespace Jay.SourceGen.Signatures;
+﻿namespace Jay.SourceGen.Signatures;
 
 public abstract class MemberSig :
     IEquatable<MemberSig>, IEquatable<ISymbol>, IEquatable<MemberInfo>

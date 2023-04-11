@@ -1,6 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-
-namespace Jay.SourceGen.Signatures;
+﻿namespace Jay.SourceGen.Signatures;
 
 public sealed class EventSig : MemberSig, IEquatable<EventSig>, IEquatable<IEventSymbol>, IEquatable<EventInfo>
 {

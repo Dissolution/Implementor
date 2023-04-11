@@ -1,26 +1,11 @@
-﻿using Jay.SourceGen.Enums;
-using Jay.SourceGen.Signatures;
+﻿namespace Jay.SourceGen.Reflection;
 
-using Microsoft.CodeAnalysis;
-
-namespace Jay.SourceGen.Reflection;
-
-[Flags]
-public enum SigType
+public abstract class MemberSig : Sig,
+    IEquatable<MemberSig>, IEquatable<ISymbol>, IEquatable<MemberInfo>
 {
-    Field = 1 << 0,
-    Property = 1 << 1,
-    Event = 1 << 2,
-    Constructor = 1 << 3,
-    Method = 1 << 4,
-    Type = 1 << 5,
-    Operator = 1 << 6,
-    Parameter = 1 << 7,
-    Attribute = 1 << 8,
-}
+    [return: NotNullIfNotNull(nameof(memberInfo))]
+    public static implicit operator MemberSig?(MemberInfo? memberInfo) => MemberSig.Create(memberInfo);
 
-partial class MemberSig
-{
     public static bool operator ==(MemberSig? left, MemberSig? right)
     {
         if (ReferenceEquals(left, right)) return true;
@@ -33,6 +18,26 @@ partial class MemberSig
         if (left is null || right is null) return true;
         return !left.Equals(right);
     }
+    public static bool operator ==(MemberSig? left, ISymbol? right)
+    {
+        if (left is null) return right is null;
+        return left.Equals(right);
+    }
+    public static bool operator !=(MemberSig? left, ISymbol? right)
+    {
+        if (left is null) return right is not null;
+        return !left.Equals(right);
+    }
+    public static bool operator ==(MemberSig? left, MemberInfo? right)
+    {
+        if (left is null) return right is null;
+        return left.Equals(right);
+    }
+    public static bool operator !=(MemberSig? left, MemberInfo? right)
+    {
+        if (left is null) return right is not null;
+        return !left.Equals(right);
+    }
 
     public static MemberSig? Create(ISymbol? symbol)
     {
@@ -43,7 +48,7 @@ partial class MemberSig
             IEventSymbol eventSymbol => new EventSig(eventSymbol),
             IMethodSymbol methodSymbol => new MethodSig(methodSymbol),
             ITypeSymbol typeSymbol => new TypeSig(typeSymbol),
-            _ => null,
+            _ => throw new ArgumentException(),
         };
     }
 
@@ -51,66 +56,43 @@ partial class MemberSig
     {
         return member switch
         {
+            null => null,
             FieldInfo fieldInfo => new FieldSig(fieldInfo),
             PropertyInfo propertyInfo => new PropertySig(propertyInfo),
             EventInfo eventInfo => new EventSig(eventInfo),
             ConstructorInfo ctorInfo => new MethodSig(ctorInfo),
             MethodInfo methodInfo => new MethodSig(methodInfo),
             Type type => new TypeSig(type),
-            _ => null,
+            _ => throw new ArgumentException(),
         };
     }
-}
-
-public abstract partial class MemberSig :
-    IEquatable<MemberSig>, IEquatable<ISymbol>, IEquatable<MemberInfo>
-{
-    public SigType SigType { get; set; } = default;
 
     public TypeSig? ParentType { get; set; } = null;
 
-    public string? Name { get; set; } = null;
 
-    public string FullName
+    protected MemberSig(SigType sigType) : base(sigType)
     {
-        get
-        {
-            if (ParentType is null)
-            {
-                return Name ?? "";
-            }
-            return $"{ParentType}.{Name ?? "???"}";
-        }
+
     }
 
-    public Visibility Visibility { get; set; } = default;
-    public Instic Instic { get; set; } = default;
-    public Keywords Keywords { get; set; } = default;
-
-
-    protected MemberSig(SigType sigType)
-    {
-        this.SigType = sigType;
-    }
-
-    protected MemberSig(SigType sigType, ISymbol symbol)
-        : this(sigType)
+    protected MemberSig(SigType sigType, ISymbol symbol) : base(sigType)
     {
         this.Name = symbol.Name;
-        this.ParentType = TypeSig.Create(symbol.ContainingType);
         this.Visibility = symbol.GetVisibility();
         this.Instic = symbol.GetInstic();
         this.Keywords = symbol.GetKeywords();
+
+        this.ParentType = TypeSig.Create(symbol.ContainingType);
     }
 
-    protected MemberSig(SigType sigType, MemberInfo member)
-        : this(sigType)
+    protected MemberSig(SigType sigType, MemberInfo member) : base(sigType)
     {
         this.Name = member.Name;
-        this.ParentType = TypeSig.Create(member.ReflectedType ?? member.DeclaringType);
         this.Visibility = member.GetVisibility();
         this.Instic = member.GetInstic();
         this.Keywords = member.GetKeywords();
+
+        this.ParentType = TypeSig.Create(member.ReflectedType ?? member.DeclaringType);
     }
 
     public virtual bool Equals(MemberSig? memberSig)
@@ -120,11 +102,22 @@ public abstract partial class MemberSig :
             string.Equals(this.Name, memberSig.Name);
     }
 
-    public virtual bool Equals(ISymbol? symbol) => Equals(Create(symbol));
+    public virtual bool Equals(MemberInfo? memberInfo)
+    {
+        return Equals(MemberSig.Create(memberInfo));
+    }
 
-    public virtual bool Equals(MemberInfo? member) => Equals(Create(member));
+    public override bool Equals(Sig? signature)
+    {
+        return signature is MemberSig memberSig && Equals(memberSig);
+    }
 
-    public override bool Equals(object obj)
+    public override bool Equals(ISymbol? symbol)
+    {
+        return Equals(MemberSig.Create(symbol));
+    }
+
+    public override bool Equals(object? obj)
     {
         if (obj is MemberSig memberSig) return Equals(memberSig);
         if (obj is ISymbol symbol) return Equals(symbol);
@@ -132,88 +125,15 @@ public abstract partial class MemberSig :
         return false;
     }
 
-    public sealed override int GetHashCode()
+    public override int GetHashCode()
     {
-        throw new NotSupportedException("All MemberSigs are mutable and not suited for hashcodes");
+        // same as base
+        return base.GetHashCode();
     }
 
     public override string ToString()
     {
-        return $"{SigType} {Name}";
-    }
-
-
-}
-
-public class FieldSig : MemberSig
-//,    IEquatable<FieldSig>, IEquatable<IFieldSymbol>, IEquatable<FieldInfo>
-{
-    public TypeSig? FieldType { get; set; } = null;
-
-    public FieldSig()
-        : base(SigType.Field)
-    {
-
-    }
-
-    public FieldSig(IFieldSymbol fieldSymbol)
-        : base(SigType.Field, fieldSymbol)
-    {
-        this.FieldType = new TypeSig(fieldSymbol.Type);
-    }
-
-    public FieldSig(FieldInfo fieldInfo)
-        : base(SigType.Field, fieldInfo)
-    {
-        this.FieldType = new TypeSig(fieldInfo.FieldType);
+        // same as base
+        return base.ToString();
     }
 }
-
-public class PropertySig : MemberSig,
-    IEquatable<PropertySig>, IEquatable<IPropertySymbol>, IEquatable<PropertyInfo>
-{
-
-}
-
-public class EventSig : MemberSig,
-    IEquatable<EventSig>, IEquatable<IEventSymbol>, IEquatable<EventInfo>
-{
-
-}
-
-public class MethodSig : MemberSig,
-    IEquatable<MethodSig>, IEquatable<IMethodSymbol>, IEquatable<MethodBase>
-{
-
-}
-
-public class TypeSig : MemberSig,
-    IEquatable<TypeSig>, IEquatable<ITypeSymbol>, IEquatable<Type>
-{
-    public static TypeSig? Create(ITypeSymbol? typeSymbol)
-    {
-        if (typeSymbol is null) return null;
-        return new TypeSig(typeSymbol);
-    }
-
-    public static TypeSig? Create(Type? type)
-    {
-        if (type is null) return null;
-        return new TypeSig(type);
-    }
-
-    public string? Namespace {get; set;}
-}
-
-public class ParameterSig :
-    IEquatable<ParameterSig>, IEquatable<IParameterSymbol>, IEquatable<ParameterInfo>
-{
-
-}
-
-public class AttributeSig :
-    IEquatable<AttributeSig>, IEquatable<AttributeData>, IEquatable<CustomAttributeData>
-{
-
-}
-

@@ -8,7 +8,7 @@ internal class BackingPropertySigWriter : IPropertySigWriter
     {
         var fieldName = BackingFieldModifier.GetBackingFieldName(propertySig);
         codeBuilder
-           .AppendValue(propertySig.Visibility, "lc")
+           .Append(propertySig.Visibility, "lc")
            .AppendIf(propertySig.Instic == Instic.Instance, " ", " static ")
            //.AppendKeywords(propertySig.Keywords)
            .Append(propertySig.PropertyType).Append(' ')

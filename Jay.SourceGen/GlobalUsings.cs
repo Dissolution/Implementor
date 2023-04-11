@@ -9,3 +9,4 @@ global using Jay.SourceGen.Extensions;
 global using Microsoft.CodeAnalysis;
 global using Microsoft.CodeAnalysis.CSharp.Syntax;
 global using System.Reflection;
+global using Jay.SourceGen.Enums;

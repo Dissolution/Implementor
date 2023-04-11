@@ -7,7 +7,7 @@ public sealed class DefaultFieldSigWriter : IFieldSigWriter
     public void Write(FieldSig fieldSig, CodeBuilder codeBuilder)
     {
         codeBuilder
-            .AppendValue(fieldSig.Visibility, "lc")
+            .Append(fieldSig.Visibility, "lc")
             .AppendIf(fieldSig.Instic == Instic.Instance, " ", " static ")
             .AppendKeywords(fieldSig.Keywords)
             .Append(fieldSig.FieldType)

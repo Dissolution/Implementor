@@ -15,3 +15,24 @@ public sealed class ImplementAttribute : Attribute
 
     public ImplementAttribute() { }
 }
+
+
+
+public enum Nullability
+{
+    /// <summary>
+    /// #nullable false
+    /// </summary>
+    False = 0,
+
+    /// <summary>
+    /// <c>#nullable true</c> <br/>
+    /// </summary>
+    True = 1 << 0,
+
+    /// <summary>
+    /// <c>#nullable true</c> <br/>
+    /// Also includes <c>null</c> checks around [NotNull] parameters
+    /// </summary>
+    Defensive = 1 << 0 | True,
+}

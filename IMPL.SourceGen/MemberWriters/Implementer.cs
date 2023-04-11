@@ -110,10 +110,10 @@ public class Implementer
             .Namespace(implType.Namespace)
             .NewLine()
             // type decleration
-            .AppendValue(implType.Visibility, "lc")
+            .Append(implType.Visibility, "lc")
             .AppendIf(implType.Instic == Instic.Static, " static ", " ")
             .AppendKeywords(implType.Keywords)
-            .AppendValue(implType.ObjType, "lc").Append(' ')
+            .Append(implType.ObjType, "lc").Append(' ')
             .Append(implType.Name)
             .If(spec.InterfaceTypes.Count > 0, WriteInterfaces)
             .BracketBlock(typeBlock =>

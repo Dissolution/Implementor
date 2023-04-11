@@ -1,8 +1,4 @@
-﻿using Jay.SourceGen.Enums;
-
-using System.Reflection.Metadata.Ecma335;
-
-namespace Jay.SourceGen.Signatures;
+﻿namespace Jay.SourceGen.Enums;
 
 [Flags]
 public enum Instic
@@ -35,17 +31,17 @@ public static class InsticExtensions
             case PropertyInfo property:
             {
                 Instic instic;
-                instic = GetInstic(property.GetMethod);
+                instic = property.GetMethod.GetInstic();
                 if (instic != default) return instic;
-                instic = GetInstic(property.SetMethod);
+                instic = property.SetMethod.GetInstic();
                 return instic;
             }
             case EventInfo @event:
             {
                 Instic instic;
-                instic = GetInstic(@event.AddMethod);
+                instic = @event.AddMethod.GetInstic();
                 if (instic != default) return instic;
-                instic = GetInstic(@event.RemoveMethod);
+                instic = @event.RemoveMethod.GetInstic();
                 return instic;
             }
             case MethodBase method:
@@ -54,7 +50,7 @@ public static class InsticExtensions
             }
             case Type type:
             {
-                return (type.IsAbstract && type.IsSealed) ? Instic.Static : Instic.Instance;
+                return type.IsAbstract && type.IsSealed ? Instic.Static : Instic.Instance;
             }
             default:
                 return default;

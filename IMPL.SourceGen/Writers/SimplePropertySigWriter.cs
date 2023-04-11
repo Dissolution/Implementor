@@ -7,7 +7,7 @@ public sealed class SimplePropertySigWriter : IPropertySigWriter
     public void Write(PropertySig propertySig, CodeBuilder codeBuilder)
     {
         codeBuilder
-            .AppendValue(propertySig.Visibility, "lc")
+            .Append(propertySig.Visibility, "lc")
             .AppendIf(propertySig.Instic == Instic.Instance, " ", " static ")
             //.AppendKeywords(propertySig.Keywords)
             .Append(propertySig.PropertyType).Append(' ')

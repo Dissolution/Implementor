@@ -1,24 +1,12 @@
-﻿using System.Reflection;
+﻿namespace Jay.SourceGen;
 
-namespace Jay.SourceGen;
-
-public sealed class AttributeArgsCollection : IReadOnlyCollection<KeyValuePair<string, object>>
+public sealed class AttributeArgsDictionary : Dictionary<string, object?>
 {
-    public static AttributeArgsCollection Empty { get; } = new();
+    public static AttributeArgsDictionary New => new AttributeArgsDictionary(0);
 
-    private readonly Dictionary<string, object?> _args;
-
-    public int Count => _args.Count;
-
-    private AttributeArgsCollection()
+    public AttributeArgsDictionary(AttributeData attributeData)
+        : base(StringComparer.OrdinalIgnoreCase)
     {
-        _args = new Dictionary<string, object?>(0, StringComparer.OrdinalIgnoreCase);
-    }
-
-    public AttributeArgsCollection(AttributeData attributeData)
-    {
-        var args = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
-
         var ctorArgs = attributeData.ConstructorArguments;
         if (ctorArgs.Length > 0)
         {
@@ -28,9 +16,9 @@ public sealed class AttributeArgsCollection : IReadOnlyCollection<KeyValuePair<s
             for (var i = 0; i < count; i++)
             {
                 string name = ctorParams[i].Name;
-                Debug.Assert(args.ContainsKey(name) == false);
+                Debug.Assert(this.ContainsKey(name) == false);
                 object? value = ctorArgs[i].GetObjectValue();
-                args[name] = value;
+                this[name] = value;
             }
         }
 
@@ -42,19 +30,15 @@ public sealed class AttributeArgsCollection : IReadOnlyCollection<KeyValuePair<s
             {
                 var arg = namedArgs[i];
                 string name = arg.Key;
-                Debug.Assert(args.ContainsKey(name) == false);
+                Debug.Assert(this.ContainsKey(name) == false);
                 object? value = arg.Value.GetObjectValue();
-                args[name] = value;
+                this[name] = value;
             }
         }
-
-        _args = args;
     }
 
-    public AttributeArgsCollection(CustomAttributeData attrData)
+    public AttributeArgsDictionary(CustomAttributeData attrData)
     {
-        var args = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
-
         var ctorArgs = attrData.ConstructorArguments;
         var ctorArgsLen = ctorArgs.Count;
         if (ctorArgsLen > 0)
@@ -64,9 +48,9 @@ public sealed class AttributeArgsCollection : IReadOnlyCollection<KeyValuePair<s
             for (var i = 0; i < ctorArgsLen; i++)
             {
                 string name = ctorParams[i].Name;
-                Debug.Assert(args.ContainsKey(name) == false);
+                Debug.Assert(this.ContainsKey(name) == false);
                 object? value = ctorArgs[i].Value;
-                args[name] = value;
+                this[name] = value;
             }
         }
 
@@ -78,58 +62,38 @@ public sealed class AttributeArgsCollection : IReadOnlyCollection<KeyValuePair<s
             {
                 var arg = namedArgs[i];
                 string name = arg.MemberName;
-                Debug.Assert(args.ContainsKey(name) == false);
+                Debug.Assert(this.ContainsKey(name) == false);
                 object? value = arg.TypedValue.Value;
-                args[name] = value;
+                this[name] = value;
             }
         }
-
-        _args = args;
-    }
-
-    public bool TryGetValue(
-        [AllowNull, NotNullWhen(true)] string? name,
-        [MaybeNullWhen(false)] out object? value)
-    {
-        if (string.IsNullOrEmpty(name))
-        {
-            value = null;
-            return false;
-        }
-        return _args.TryGetValue(name!, out value);
     }
 
     public bool TryGetValue<TValue>(
         [AllowNull, NotNullWhen(true)] string? name,
         [MaybeNullWhen(false)] out TValue? value)
     {
-        if (TryGetValue(name, out object? objValue))
+        if (TryGetValue(name, out object? objValue) && objValue is TValue)
         {
-            if (objValue is TValue)
-            {
-                value = (TValue)objValue;
-                return true;
-            }
+            value = (TValue)objValue;
+            return true;
         }
         value = default;
         return false;
     }
 
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => _args.GetEnumerator();
-
-    public override bool Equals(object? obj)
+    public override bool Equals(object obj)
     {
-        return obj is AttributeArgsCollection aac &&
-            this.SequenceEqual(aac);
+        return base.Equals(obj);
     }
 
     public override int GetHashCode()
     {
         Hasher hasher = new();
-        foreach (var pair in _args)
+        foreach (var pair in this)
         {
-            hasher.Add(pair);
+            hasher.Add(pair.Key, StringComparer.OrdinalIgnoreCase);
+            hasher.Add(pair.Value);
         }
         return hasher.ToHashCode();
     }

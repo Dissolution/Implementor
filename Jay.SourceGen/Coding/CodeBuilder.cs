@@ -28,6 +28,8 @@ partial class CodeBuilder
     /// spaces &gt; tabs
     /// </remarks>
     public static string DefaultIndent { get; set; } = "    ";
+
+    public static CodeBuilder New => new CodeBuilder();
 }
 
 
@@ -420,7 +422,7 @@ public sealed partial class CodeBuilder : IDisposable
             object? arg = args[index];
 
             // Append this arg, allows for overridden behavior
-            this.AppendValue(arg, itemFormat);
+            this.Append(arg, itemFormat);
 
             // Continue parsing the rest of the format string.
         }
@@ -518,7 +520,7 @@ public sealed partial class CodeBuilder : IDisposable
         return Append(value.ToString());
     }
 
-    public CodeBuilder AppendValue<T>([AllowNull] T? value,
+    public CodeBuilder Append<T>([AllowNull] T? value,
         string? format,
         IFormatProvider? provider = default)
     {

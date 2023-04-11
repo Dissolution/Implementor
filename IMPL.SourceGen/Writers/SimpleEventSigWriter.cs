@@ -7,7 +7,7 @@ public sealed class SimpleEventSigWriter : IEventSigWriter
     public void Write(EventSig eventSig, CodeBuilder codeBuilder)
     {
         codeBuilder
-            .AppendValue(eventSig.Visibility, "lc")
+            .Append(eventSig.Visibility, "lc")
             .AppendIf(eventSig.Instic == Instic.Instance, " ", " static ")
             .AppendKeywords(eventSig.Keywords)
             .Append(" event ")
