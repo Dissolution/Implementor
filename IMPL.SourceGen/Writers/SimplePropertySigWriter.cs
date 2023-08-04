@@ -1,4 +1,4 @@
-﻿namespace IMPL.SourceGen.MemberWriters;
+﻿namespace IMPL.SourceGen.Writers;
 
 public sealed class SimplePropertySigWriter : IPropertySigWriter
 {

@@ -2,7 +2,11 @@
 
 public sealed class AttributeArgsDictionary : Dictionary<string, object?>
 {
-    public static AttributeArgsDictionary New => new AttributeArgsDictionary(0);
+    public AttributeArgsDictionary()
+        : base(0, StringComparer.OrdinalIgnoreCase)
+    {
+
+    }
 
     public AttributeArgsDictionary(AttributeData attributeData)
         : base(StringComparer.OrdinalIgnoreCase)
@@ -73,7 +77,7 @@ public sealed class AttributeArgsDictionary : Dictionary<string, object?>
         [AllowNull, NotNullWhen(true)] string? name,
         [MaybeNullWhen(false)] out TValue? value)
     {
-        if (TryGetValue(name, out object? objValue) && objValue is TValue)
+        if (name is not null && base.TryGetValue(name, out object? objValue) && objValue is TValue)
         {
             value = (TValue)objValue;
             return true;

@@ -1,6 +1,4 @@
-﻿using IMPL.SourceGen.MemberWriters;
-
-namespace IMPL.SourceGen.MemberCodes;
+﻿namespace IMPL.SourceGen.MemberCodes;
 
 public sealed class CustomMemberCode : IMemberCode
 {
@@ -11,6 +9,11 @@ public sealed class CustomMemberCode : IMemberCode
     public CustomMemberCode(MemberPos pos, Action<Implementer, CodeBuilder> writeCode)
     {
         this.Pos = pos;
+        _writeCode = writeCode;
+    }
+     public CustomMemberCode(Sig sig, Action<Implementer, CodeBuilder> writeCode)
+    {
+        this.Pos = new(sig.Instic, sig.SigType, sig.Visibility);
         _writeCode = writeCode;
     }
 

@@ -1,4 +1,6 @@
-﻿namespace IMPL.SourceGen.MemberWriters;
+﻿using IMPL.SourceGen.Writers;
+
+namespace IMPL.SourceGen;
 
 public interface IPropertyImplementer
 {

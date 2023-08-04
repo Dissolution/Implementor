@@ -2,14 +2,14 @@
 
 public static class AttributeExtensions
 {
-    public static AttributeArgsCollection GetArgs(this AttributeData attributeData)
+    public static AttributeArgsDictionary GetArgs(this AttributeData attributeData)
     {
-        return new AttributeArgsCollection(attributeData);
+        return new AttributeArgsDictionary(attributeData);
     }
 
-    public static AttributeArgsCollection GetArgs(this CustomAttributeData customAttributeData)
+    public static AttributeArgsDictionary GetArgs(this CustomAttributeData customAttributeData)
     {
-        return new AttributeArgsCollection(customAttributeData);
+        return new AttributeArgsDictionary(customAttributeData);
     }
 
     public static string? GetFullTypeName(this AttributeData attributeData)

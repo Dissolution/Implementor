@@ -72,7 +72,7 @@
         <Using Include="Jay.SourceGen" />
         <Using Include="Jay.SourceGen.Coding" />
         <Using Include="Jay.SourceGen.Enums" />
-        <Using Include="Jay.SourceGen.Signatures" />
+        <Using Include="Jay.SourceGen.Reflection" />
         <Using Include="Jay.SourceGen.Text" />
         <Using Include="Jay.SourceGen.Extensions" />
         

@@ -1,9 +1,10 @@
 ﻿using IMPL.SourceGen.MemberCodes;
 using IMPL.SourceGen.Modifiers;
+using IMPL.SourceGen.Writers;
 
 using System.Diagnostics;
 
-namespace IMPL.SourceGen.MemberWriters;
+namespace IMPL.SourceGen;
 
 public class Implementer
 {
@@ -44,12 +45,12 @@ public class Implementer
         }
 
         // Pre-register non-interface specific
-        this.ImplModifiers.Where(im => im is not IInterfaceImplementationModifier).Consume(im => im.PreRegister(this));
+        ImplModifiers.Where(im => im is not IInterfaceImplementationModifier).Consume(im => im.PreRegister(this));
 
         // Scan interfaces for writer overrides
         foreach (var interfaceType in spec.InterfaceTypes)
         {
-            var handler = this.ImplModifiers.FirstOrDefault(io => io is IInterfaceImplementationModifier iim && iim.AppliesTo(interfaceType));
+            var handler = ImplModifiers.FirstOrDefault(io => io is IInterfaceImplementationModifier iim && iim.AppliesTo(interfaceType));
             if (handler is not null)
             {
                 handler.PreRegister(this);
@@ -69,7 +70,7 @@ public class Implementer
         {
             Instic = memberSig.Instic,
             Visibility = memberSig.Visibility,
-            MemberType = memberSig.MemberType,
+            SigType = memberSig.SigType,
         };
         Members.Add((memberPos, memberSig));
     }
@@ -77,7 +78,7 @@ public class Implementer
     public IEnumerable<TMember> GetMembers<TMember>()
         where TMember : MemberSig
     {
-        return this.Members
+        return Members
             .Select(static p => p.Item2)
             .OfType<TMember>();
     }
@@ -122,7 +123,7 @@ public class Implementer
                 foreach (Instic instic in new[] { Instic.Static, Instic.Instance })
                 {
                     // operators, fields, properties, events, constructors, methods
-                    foreach (MemberTypes memberType in new[] { MemberTypes.Custom, MemberTypes.Field, MemberTypes.Property, MemberTypes.Event, MemberTypes.Constructor, MemberTypes.Method })
+                    foreach (SigType sigType in new[] { SigType.Operator, SigType.Field, SigType.Property, SigType.Event, SigType.Constructor, SigType.Method })
                     {
                         // private -> public
                         foreach (Visibility visibility in new[] { Visibility.Private, Visibility.Protected, Visibility.Protected | Visibility.Internal, Visibility.Internal, Visibility.Public })
@@ -131,7 +132,7 @@ public class Implementer
                             var sectionMembers = Members.Where(p =>
                             {
                                 var pos = p.Item1;
-                                return pos.Instic == instic && pos.MemberType == memberType && pos.Visibility == visibility;
+                                return pos.Instic == instic && pos.SigType == sigType && pos.Visibility == visibility;
                             }).ToList();
 
                             if (sectionMembers.Count == 0) continue;
@@ -157,8 +158,8 @@ public class Implementer
                                 else if (obj is MethodSig methodSig)
                                 {
                                     // Ignore Getters + Setters, they'll have been handled by their property
-                                    if (methodSig.Name.StartsWith("get_") ||
-                                        methodSig.Name.StartsWith("set_"))
+                                    if (methodSig.Name!.StartsWith("get_") ||
+                                        methodSig.Name!.StartsWith("set_"))
                                     {
                                         // Ignore
                                         continue;

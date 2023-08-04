@@ -1,6 +1,4 @@
-﻿using IMPL.SourceGen.MemberWriters;
-
-namespace IMPL.SourceGen.MemberCodes;
+﻿namespace IMPL.SourceGen.MemberCodes;
 
 public interface IMemberCode
 {

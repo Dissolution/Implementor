@@ -1,6 +1,6 @@
-﻿using IMPL.SourceGen.MemberWriters;
-using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+
 using System.Collections.Immutable;
 using System.Diagnostics;
 
@@ -130,7 +130,11 @@ public sealed class ImplementationGenerator : IIncrementalGenerator
                         throw new InvalidOperationException("Name may only be specified on Interfaces");
 
                     typeSig.Name = name!;
-                    typeSig.FullName = $"{typeSymbol.GetFQNamespace()}.{name}";
+                    var ns = typeSymbol.GetNamespace();
+                    if (ns is null)
+                        typeSig.FullName = name!;
+                    else
+                        typeSig.FullName = $"{ns}.{name}";
                 }
 
                 // Keywords override?
@@ -222,7 +226,7 @@ public sealed class ImplementationGenerator : IIncrementalGenerator
                     interfaceSigs.Add(new TypeSig(typeSymbol));
                     foreach (var memberSymbol in typeSymbol.GetMembers())
                     {
-                        memberSigs.Add(MemberSig.Create(memberSymbol));
+                        memberSigs.Add(MemberSig.Create(memberSymbol)!);
                     }
                 }
                 // The rest
@@ -231,7 +235,7 @@ public sealed class ImplementationGenerator : IIncrementalGenerator
                     interfaceSigs.Add(new TypeSig(interfaceSymbol));
                     foreach (var memberSymbol in interfaceSymbol.GetMembers())
                     {
-                        memberSigs.Add(MemberSig.Create(memberSymbol));
+                        memberSigs.Add(MemberSig.Create(memberSymbol)!);
                     }
                 }
 
@@ -280,14 +284,6 @@ public sealed class ImplementationGenerator : IIncrementalGenerator
             }
         }
     }
-}
-
-
-public sealed class ImplSpec
-{
-    public required TypeSig ImplType { get; init; }
-    public required IReadOnlyList<TypeSig> InterfaceTypes { get; init; }
-    public required IReadOnlyList<MemberSig> Members { get; init; }
 }
 
 

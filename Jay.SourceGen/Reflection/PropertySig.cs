@@ -1,9 +1,4 @@
-﻿using Jay.SourceGen.Coding;
-using Jay.SourceGen.Signatures;
-
-using Microsoft.CodeAnalysis;
-
-namespace Jay.SourceGen.Reflection;
+﻿namespace Jay.SourceGen.Reflection;
 
 public sealed class PropertySig : MemberSig,
     IEquatable<PropertySig>, IEquatable<IPropertySymbol>, IEquatable<PropertyInfo>
@@ -146,6 +141,11 @@ public sealed class PropertySig : MemberSig,
         if (obj is IPropertySymbol propertySymbol) return Equals(propertySymbol);
         if (obj is PropertyInfo propertyInfo) return Equals(propertyInfo);
         return false;
+    }
+
+    public override int GetHashCode()
+    {
+        return Hasher.Create(SigType.Property, Name, PropertyType);
     }
 
     public override string ToString()

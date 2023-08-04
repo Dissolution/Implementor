@@ -1,6 +1,6 @@
 ﻿using IMPL.SourceGen.Modifiers;
 
-namespace IMPL.SourceGen.MemberWriters;
+namespace IMPL.SourceGen.Writers;
 
 internal class BackingPropertySigWriter : IPropertySigWriter
 {

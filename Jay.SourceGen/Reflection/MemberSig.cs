@@ -67,8 +67,10 @@ public abstract class MemberSig : Sig,
         };
     }
 
-    public TypeSig? ParentType { get; set; } = null;
 
+
+    public TypeSig? ParentType { get; set; } = null;
+    public IReadOnlyList<AttributeSig> Attributes {get;set;} = Array.Empty<AttributeSig>();
 
     protected MemberSig(SigType sigType) : base(sigType)
     {
@@ -83,6 +85,7 @@ public abstract class MemberSig : Sig,
         this.Keywords = symbol.GetKeywords();
 
         this.ParentType = TypeSig.Create(symbol.ContainingType);
+        this.Attributes = symbol.GetAttributes().Select(static a => AttributeSig.Create(a)).ToList();
     }
 
     protected MemberSig(SigType sigType, MemberInfo member) : base(sigType)
@@ -93,7 +96,16 @@ public abstract class MemberSig : Sig,
         this.Keywords = member.GetKeywords();
 
         this.ParentType = TypeSig.Create(member.ReflectedType ?? member.DeclaringType);
+        this.Attributes = member.GetCustomAttributesData().Select(static a => AttributeSig.Create(a)).ToList();
     }
+
+
+    public bool HasAttribute<TAttribute>()
+        where TAttribute : Attribute
+    {
+        return this.Attributes.Any(attr => attr.Name == typeof(TAttribute).Name);
+    }
+
 
     public virtual bool Equals(MemberSig? memberSig)
     {
@@ -133,7 +145,12 @@ public abstract class MemberSig : Sig,
 
     public override string ToString()
     {
-        // same as base
-        return base.ToString();
+        return CodeBuilder.New
+            .If(Attributes.Count > 0, b => b.Append('[').DelimitAppend(", ", Attributes).AppendLine(']'))
+            .Append(this.Visibility, "lc")
+            .AppendIf(this.Instic == Instic.Static, " static ", " ")
+            .AppendKeywords(this.Keywords)
+            .Append(this.SigType, "lc").Append(' ').Append(this.Name)
+            .ToStringAndDispose();
     }
 }

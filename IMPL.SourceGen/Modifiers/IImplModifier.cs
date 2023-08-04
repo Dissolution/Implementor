@@ -1,6 +1,4 @@
-﻿using IMPL.SourceGen.MemberWriters;
-
-namespace IMPL.SourceGen.Modifiers;
+﻿namespace IMPL.SourceGen.Modifiers;
 
 public interface IImplModifier
 {

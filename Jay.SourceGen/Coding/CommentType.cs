@@ -5,8 +5,9 @@ public enum CommentType
     /// <summary>
     /// <c>// comment</c><br/>
     /// <i>or</i><br/>
-    /// <c>// comment 1<br/>
-    ///    // comment 2<br/>
+    /// <c>
+    /// // comment 1<br/>
+    /// // comment 2<br/>
     /// </c>
     /// </summary>a
     SingleLine,
@@ -30,5 +31,5 @@ public enum CommentType
     /// /// comment 2<br />
     /// </c>
     /// </summary>
-    XML,
+    Xml,
 }

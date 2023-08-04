@@ -1,75 +1,88 @@
 ﻿namespace Jay.SourceGen.Reflection;
 
 public sealed class AttributeSig : Sig,
-    IEquatable<AttributeSig>, IEquatable<AttributeData>, IEquatable<CustomAttributeData>
+        IEquatable<AttributeSig>,
+        IEquatable<AttributeData>,
+        IEquatable<CustomAttributeData>
 {
     [return: NotNullIfNotNull(nameof(attributeData))]
-    public static implicit operator AttributeSig?(AttributeData? attributeData) => AttributeSig.Create(attributeData);
+    public static implicit operator AttributeSig?(AttributeData? attributeData) =>
+        AttributeSig.Create(attributeData);
 
     [return: NotNullIfNotNull(nameof(customAttrData))]
-    public static implicit operator AttributeSig?(CustomAttributeData? customAttrData) => AttributeSig.Create(customAttrData);
-
+    public static implicit operator AttributeSig?(CustomAttributeData? customAttrData) =>
+        AttributeSig.Create(customAttrData);
 
     public static bool operator ==(AttributeSig? left, AttributeSig? right)
     {
-        if (left is null) return right is null;
+        if (left is null)
+            return right is null;
         return left.Equals(right);
     }
+
     public static bool operator !=(AttributeSig? left, AttributeSig? right)
     {
-        if (left is null) return right is not null;
+        if (left is null)
+            return right is not null;
         return !left.Equals(right);
     }
+
     public static bool operator ==(AttributeSig? left, AttributeData? right)
     {
-        if (left is null) return right is null;
+        if (left is null)
+            return right is null;
         return left.Equals(right);
     }
+
     public static bool operator !=(AttributeSig? left, AttributeData? right)
     {
-        if (left is null) return right is not null;
+        if (left is null)
+            return right is not null;
         return !left.Equals(right);
     }
+
     public static bool operator ==(AttributeSig? left, CustomAttributeData? right)
     {
-        if (left is null) return right is null;
+        if (left is null)
+            return right is null;
         return left.Equals(right);
     }
+
     public static bool operator !=(AttributeSig? left, CustomAttributeData? right)
     {
-        if (left is null) return right is not null;
+        if (left is null)
+            return right is not null;
         return !left.Equals(right);
     }
 
     [return: NotNullIfNotNull(nameof(attributeData))]
     public static AttributeSig? Create(AttributeData? attributeData)
     {
-        if (attributeData is null) return null;
+        if (attributeData is null)
+            return null;
         return new AttributeSig(attributeData);
     }
+
     [return: NotNullIfNotNull(nameof(customAttrData))]
     public static AttributeSig? Create(CustomAttributeData? customAttrData)
     {
-        if (customAttrData is null) return null;
+        if (customAttrData is null)
+            return null;
         return new AttributeSig(customAttrData);
     }
-
-
-    public TypeSig? AttributeType { get; set; } = null;
 
     public AttributeArgsDictionary Args { get; }
 
     public AttributeSig()
         : base(SigType.Attribute)
     {
-        this.Args = AttributeArgsDictionary.New;
+        this.Args = new();
     }
 
     public AttributeSig(AttributeData attributeData)
         : base(SigType.Attribute)
     {
         var attrClass = attributeData.AttributeClass;
-        this.AttributeType = TypeSig.Create(attrClass);
         this.Name = attrClass?.Name ?? attributeData.ToString();
         this.Args = new(attributeData);
     }
@@ -77,33 +90,29 @@ public sealed class AttributeSig : Sig,
     public AttributeSig(CustomAttributeData customAttributeData)
         : base(SigType.Attribute)
     {
-        this.AttributeType = new TypeSig(customAttributeData.AttributeType);
         this.Name = customAttributeData.AttributeType.Name;
         this.Args = new(customAttributeData);
     }
 
     public bool Equals(AttributeSig? attributeSig)
     {
-        return attributeSig is not null &&
-            this.Name == attributeSig.Name &&
-            this.AttributeType == attributeSig.AttributeType &&
-            this.Args.SequenceEqual(attributeSig.Args);
+        return attributeSig is not null
+            && this.Name == attributeSig.Name
+            && this.Args.SequenceEqual(attributeSig.Args);
     }
 
     public bool Equals(AttributeData? attributeData)
     {
-        return attributeData is not null &&
-            this.Name == attributeData.AttributeClass?.Name &&
-            this.AttributeType == attributeData.AttributeClass &&
-            this.Args.SequenceEqual(attributeData.GetArgs());
+        return attributeData is not null
+            && this.Name == attributeData.AttributeClass?.Name
+            && this.Args.SequenceEqual(attributeData.GetArgs());
     }
 
     public bool Equals(CustomAttributeData? customAttrData)
     {
-        return customAttrData is not null &&
-            this.Name == customAttrData.AttributeType.Name &&
-            this.AttributeType == customAttrData.AttributeType &&
-            this.Args.SequenceEqual(customAttrData.GetArgs());
+        return customAttrData is not null
+            && this.Name == customAttrData.AttributeType.Name
+            && this.Args.SequenceEqual(customAttrData.GetArgs());
     }
 
     public override bool Equals(Sig? signature)
@@ -118,19 +127,31 @@ public sealed class AttributeSig : Sig,
 
     public override bool Equals(object? obj)
     {
-        if (obj is AttributeSig attributeSig) return Equals(attributeSig);
-        if (obj is AttributeData attributeData) return Equals(attributeData);
-        if (obj is CustomAttributeData customAttrData) return Equals(customAttrData);
+        if (obj is AttributeSig attributeSig)
+            return Equals(attributeSig);
+        if (obj is AttributeData attributeData)
+            return Equals(attributeData);
+        if (obj is CustomAttributeData customAttrData)
+            return Equals(customAttrData);
         return false;
     }
 
     public override int GetHashCode()
     {
-        return Hasher.Create(SigType.Attribute, AttributeType, Args);
+        return Hasher.Create(SigType.Attribute, Name, Args);
     }
 
     public override string ToString()
     {
-        return $"Attribute: {AttributeType} {Name} [{Args}]";
+        return CodeBuilder.New
+            .Append('[')
+            .Append(Name)
+            .If(Args.Count > 0,
+                cb => cb.Append('(')
+                        .Delimit(", ", Args, static (ab, a) => ab.Code($"{a.Key} = {a.Value}"))
+                        .Append(')')
+            )
+            .Append(']')
+            .ToStringAndDispose();
     }
 }

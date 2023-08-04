@@ -1,6 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-
-namespace Jay.SourceGen.Reflection;
+﻿namespace Jay.SourceGen.Reflection;
 
 public sealed class TypeSig : MemberSig,
     IEquatable<TypeSig>, IEquatable<ITypeSymbol>, IEquatable<Type>
@@ -54,12 +52,41 @@ public sealed class TypeSig : MemberSig,
 
     public string? Namespace { get; set; } = null;
     public string? FullName { get; set; } = null;
+    public ObjType ObjType {get;set;} = default;
 
     public TypeSig(ITypeSymbol typeSymbol)
         : base(SigType.Type, typeSymbol)
     {
         this.Namespace = typeSymbol.GetNamespace();
         this.FullName = typeSymbol.GetFullName();
+        this.Name = typeSymbol.ToString();
+        if (typeSymbol.IsValueType)
+        {
+            this.ObjType = ObjType.Struct;
+        }
+        else
+        {
+            switch (typeSymbol.TypeKind)
+            {
+                case TypeKind.Delegate:
+                {
+                    this.ObjType = ObjType.Delegate;
+                    break;
+                }
+                case TypeKind.Interface:
+                {
+                    this.ObjType = ObjType.Interface;
+                    break;
+                }
+                case TypeKind.Class:
+                {
+                    this.ObjType = ObjType.Class;
+                    break;
+                }
+                default:
+                    throw new NotImplementedException();
+            }
+        }
     }
 
     public TypeSig(Type type)
@@ -67,6 +94,25 @@ public sealed class TypeSig : MemberSig,
     {
         this.Namespace = type.Namespace;
         this.FullName = type.FullName;
+        this.Name = type.ToString();
+        if (type.IsValueType)
+        {
+            this.ObjType = ObjType.Struct;
+        }
+        else if (typeof(Delegate).IsAssignableFrom(type))
+        {
+            this.ObjType = ObjType.Delegate;
+        }
+        else if (type.IsInterface)
+        {
+            this.ObjType = ObjType.Interface;
+        }
+        else if (type.IsClass)
+        {
+            this.ObjType = ObjType.Class;
+        }
+        else
+            throw new NotImplementedException();
     }
 
     public TypeSig()
@@ -128,7 +174,7 @@ public sealed class TypeSig : MemberSig,
 
     public override string ToString()
     {
-        return FullName;
+        return Name;
     }
 
 }

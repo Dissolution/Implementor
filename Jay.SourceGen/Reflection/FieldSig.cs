@@ -1,8 +1,4 @@
-﻿using Jay.SourceGen.Coding;
-
-using Microsoft.CodeAnalysis;
-
-namespace Jay.SourceGen.Reflection;
+﻿namespace Jay.SourceGen.Reflection;
 
 public sealed class FieldSig : MemberSig,
     IEquatable<FieldSig>, IEquatable<IFieldSymbol>, IEquatable<FieldInfo>

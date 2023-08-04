@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace Jay.SourceGen.Text;
+﻿namespace Jay.SourceGen.Text;
 
 public ref struct TextSplitEnumerator //: IEnumerator<ReadOnlySpan<char>>, IEnumerator
 {

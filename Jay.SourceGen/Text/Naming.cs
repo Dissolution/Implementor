@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-
-namespace Jay.SourceGen.Text;
+﻿namespace Jay.SourceGen.Text;
 
 public enum Naming
 {

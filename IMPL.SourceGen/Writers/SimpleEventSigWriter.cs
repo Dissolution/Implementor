@@ -1,4 +1,4 @@
-﻿namespace IMPL.SourceGen.MemberWriters;
+﻿namespace IMPL.SourceGen.Writers;
 
 public sealed class SimpleEventSigWriter : IEventSigWriter
 {
@@ -10,9 +10,10 @@ public sealed class SimpleEventSigWriter : IEventSigWriter
             .Append(eventSig.Visibility, "lc")
             .AppendIf(eventSig.Instic == Instic.Instance, " ", " static ")
             .AppendKeywords(eventSig.Keywords)
-            .Append(" event ")
+            .Append("event ")
             .Append(eventSig.EventType)
             .Append("? ")
-            .Append(eventSig.Name).AppendLine(';');
+            .Append(eventSig.Name)
+            .AppendLine(';');
     }
 }

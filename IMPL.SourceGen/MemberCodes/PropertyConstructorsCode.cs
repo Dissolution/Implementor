@@ -1,11 +1,11 @@
-﻿using IMPL.SourceGen.MemberWriters;
-using IMPL.SourceGen.Modifiers;
+﻿using IMPL.SourceGen.Modifiers;
+using IMPL.SourceGen.Writers;
 
 namespace IMPL.SourceGen.MemberCodes;
 
 public class PropertyConstructorsCode : IMemberCode
 {
-    public MemberPos Pos { get; } = new(Instic.Instance, MemberTypes.Constructor, Visibility.Public);
+    public MemberPos Pos { get; } = new(Instic.Instance, SigType.Constructor, Visibility.Public);
 
     public void Write(Implementer implementer, CodeBuilder codeBuilder)
     {
@@ -45,7 +45,7 @@ public class PropertyConstructorsCode : IMemberCode
                         }
                         else
                         {
-                            thingName = p.Name;
+                            thingName = p.Name!;
                         }
 
                         b.Append("this.").Append(thingName).Append(" = ").Append(p.Name.ToVariableName()).Append(';');

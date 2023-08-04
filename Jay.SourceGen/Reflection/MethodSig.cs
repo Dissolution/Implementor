@@ -1,6 +1,4 @@
-﻿using Jay.SourceGen.Coding;
-
-namespace Jay.SourceGen.Reflection;
+﻿namespace Jay.SourceGen.Reflection;
 
 public sealed class MethodSig : MemberSig,
     IEquatable<MethodSig>, IEquatable<IMethodSymbol>, IEquatable<MethodBase>

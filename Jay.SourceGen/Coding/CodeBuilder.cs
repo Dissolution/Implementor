@@ -1,6 +1,4 @@
 ﻿using Jay.SourceGen.Text;
-
-using System.Runtime.CompilerServices;
 using System.Text;
 
 
@@ -473,6 +471,11 @@ public sealed partial class CodeBuilder : IDisposable
             {
                 return IndentAwareAction(codeBuilderAction);
             }
+            case ICodeWritable codeWritable:
+            {
+                codeWritable.Write(this);
+                return this;
+            }
             case Delegate del:
             {
                 // Check for CBA compat
@@ -485,8 +488,7 @@ public sealed partial class CodeBuilder : IDisposable
                 {
                     // Cannot cast
                     Debugger.Break();
-                    // fallthrough
-                    break;
+                    throw ex;
                 }
 
                 if (codeBuilderAction is not null)
@@ -557,6 +559,11 @@ public sealed partial class CodeBuilder : IDisposable
             var alloc = this.Allocate(str.Length);
             alloc[0] = char.ToLower(str[0]);
             TextHelper.CopyTo(str[1..], alloc[1..]);
+            return this;
+        }
+        else if (value is ICodeWritable codeWritable)
+        {
+            codeWritable.Write(this);
             return this;
         }
         else if (value is IFormattable)
@@ -1082,7 +1089,7 @@ public sealed partial class CodeBuilder : IDisposable
                 }
                 break;
             }
-            case CommentType.XML:
+            case CommentType.Xml:
             {
                 foreach (var line in splitEnumerable)
                 {

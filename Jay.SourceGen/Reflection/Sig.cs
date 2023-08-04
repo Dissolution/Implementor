@@ -1,6 +1,4 @@
-﻿using Jay.SourceGen.Coding;
-
-namespace Jay.SourceGen.Reflection;
+﻿namespace Jay.SourceGen.Reflection;
 
 public abstract class Sig : IEquatable<Sig>, IEquatable<ISymbol>
 {

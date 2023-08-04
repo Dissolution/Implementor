@@ -1,6 +1,4 @@
-﻿using Jay.SourceGen.Coding;
-
-namespace Jay.SourceGen.Reflection;
+﻿namespace Jay.SourceGen.Reflection;
 
 public sealed class EventSig : MemberSig,
     IEquatable<EventSig>, IEquatable<IEventSymbol>, IEquatable<EventInfo>
@@ -53,6 +51,8 @@ public sealed class EventSig : MemberSig,
     }
 
     public TypeSig? EventType { get; set; } = null;
+    public MethodSig? HandlerSig {get;set;} = null;
+
     public MethodSig? AddMethod { get; set; } = null;
     public MethodSig? RemoveMethod { get; set; } = null;
     public MethodSig? RaiseMethod { get; set; } = null;
@@ -67,6 +67,15 @@ public sealed class EventSig : MemberSig,
         : base(SigType.Event, eventSymbol)
     {
         this.EventType = TypeSig.Create(eventSymbol.Type);
+        
+        var invokeSymbol = eventSymbol
+            .Type
+            .GetMembers("Invoke")
+            .OfType<IMethodSymbol>()
+            .OneOrDefault();
+        this.HandlerSig = MethodSig.Create(invokeSymbol);
+
+
         this.AddMethod = MethodSig.Create(eventSymbol.AddMethod);
         this.RemoveMethod = MethodSig.Create(eventSymbol.RemoveMethod);
         this.RaiseMethod = MethodSig.Create(eventSymbol.RaiseMethod);
@@ -76,6 +85,13 @@ public sealed class EventSig : MemberSig,
         : base(SigType.Event, eventInfo)
     {
         this.EventType = TypeSig.Create(eventInfo.EventHandlerType);
+
+        var invokeMethod = eventInfo
+            .EventHandlerType
+            .GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance)
+            .Where(method => method.Name == "Invoke")
+            .OneOrDefault();
+
         this.AddMethod = MethodSig.Create(eventInfo.AddMethod);
         this.RemoveMethod = MethodSig.Create(eventInfo.RemoveMethod);
         this.RaiseMethod = MethodSig.Create(eventInfo.RaiseMethod);

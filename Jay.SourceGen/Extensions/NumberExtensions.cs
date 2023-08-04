@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace Jay.SourceGen.Extensions;
+﻿namespace Jay.SourceGen.Extensions;
 
 public static class NumberExtensions
 {

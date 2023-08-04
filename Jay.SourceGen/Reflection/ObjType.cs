@@ -1,4 +1,4 @@
-﻿namespace Jay.SourceGen.Signatures;
+﻿namespace Jay.SourceGen.Reflection;
 
 [Flags]
 public enum ObjType

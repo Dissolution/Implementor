@@ -1,8 +1,4 @@
-﻿using Jay.SourceGen.Coding;
-
-using System.Runtime.CompilerServices;
-
-[Flags]
+﻿[Flags]
 public enum Keywords
 {
     None = 0,

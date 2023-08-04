@@ -1,13 +1,11 @@
-﻿using IMPL.SourceGen.MemberWriters;
-
-namespace IMPL.SourceGen.Modifiers;
+﻿namespace IMPL.SourceGen.Modifiers;
 
 
 public class BackingFieldModifier : IImplModifier
 {
     public static string GetBackingFieldName(PropertySig propertySig)
     {
-        string propName = propertySig.Name;
+        string propName = propertySig.Name!;
         Span<char> buffer = stackalloc char[propName.Length + 1];
         buffer[0] = '_';
         buffer[1] = char.ToLower(propName[0]);
@@ -24,7 +22,7 @@ public class BackingFieldModifier : IImplModifier
         {
             // Do we already have a backing field?
             FieldSig? field = fields
-                .Where(f => f.Name.Contains(property.Name) && f.FieldType == property.PropertyType)
+                .Where(f => f.Name!.Contains(property.Name) && f.FieldType == property.PropertyType)
                 .OneOrDefault();
             if (field is null)
             {

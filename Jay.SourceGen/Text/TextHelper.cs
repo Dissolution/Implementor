@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-using static InlineIL.IL;
+﻿using static InlineIL.IL;
 
 // ReSharper disable InvokeAsExtensionMethod
 // ^ I want to be sure I'm calling the very specific version of a method
