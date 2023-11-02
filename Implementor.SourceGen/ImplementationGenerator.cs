@@ -1,10 +1,8 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Text;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using static Jay.SourceGen.Debugging.DebugLog;
 
 namespace Implementor.SourceGen;
 
@@ -16,36 +14,35 @@ public sealed class ImplementationGenerator : IIncrementalGenerator
         context.RegisterPostInitializationOutput(ctx =>
         {
             const string code = """
-                namespace Woah;
-                public static class Hello
-                {
-                    public static void World()
-                    {
-                        Console.WriteLine("Hello, World!");
-                    }
-                }
-                """;
+                                namespace Woah;
+                                public static class Hello
+                                {
+                                    public static void World()
+                                    {
+                                        Console.WriteLine("Hello, World!");
+                                    }
+                                }
+                                """;
             ctx.AddSource("ExampleGenerator.g", SourceText.From(code, Encoding.UTF8));
         });
-        
+
 #if DEBUG
         if (!Debugger.IsAttached)
         {
             Debugger.Launch();
-            Log($"Debugger Attached");
+            Debug.WriteLine($"Debugger Attached");
         }
+
         Debugger.Break();
 #endif
-        
-        
-        /*
+
         // Initial filter for things with our attribute
         var typeDeclarations = context.SyntaxProvider
-             .ForAttributeWithMetadataName(
+            .ForAttributeWithMetadataName(
                 fullyQualifiedMetadataName: ContractNames.ImplementAttribute.FullName,
                 predicate: static (syntaxNode, _) => syntaxNode is TypeDeclarationSyntax,
                 transform: static (ctx, _) => (TypeDeclarationSyntax)ctx.TargetNode)
-             .Where(t => t is not null)!;
+            .Where(t => t is not null)!;
 
         // Combine with Compilation
         var compAndDecl = context.CompilationProvider
@@ -65,21 +62,25 @@ public sealed class ImplementationGenerator : IIncrementalGenerator
         if (!Debugger.IsAttached)
         {
             Debugger.Launch();
-            Log($"Debugger Attached");
+            Debug.WriteLine($"Debugger Attached");
         }
+
         Debugger.Break();
+
+        Jay.Debugging.Hold.Onto(147);
 #endif
-        
+
         // If we have nothing to process, exit quickly
         if (typeDeclarations.IsDefaultOrEmpty) return;
 
         // Get a passable CancellationToken
         var token = sourceProductionContext.CancellationToken;
 
+
         // Load our attribute's symbol
         INamedTypeSymbol? attributeSymbol = compilation
             .GetTypesByMetadataName(ContractNames.ImplementAttribute.FullName)
-            .OneOrDefault();
+            .FirstOrDefault();
         if (attributeSymbol is null)
         {
             // Cannot!
@@ -107,7 +108,7 @@ public sealed class ImplementationGenerator : IIncrementalGenerator
                 // ImplementAttribute
                 AttributeData? implementAttributeData = typeSymbol
                     .GetAttributes()
-                    .FirstOrDefault(attr => TextEqual(attr.AttributeClass?.GetFullName(), ContractNames.ImplementAttribute.FullName));
+                    .FirstOrDefault(attr => string.Equals(attr.AttributeClass?.Name, ContractNames.ImplementAttribute.FullName));
 
                 if (implementAttributeData is null)
                 {
@@ -115,16 +116,11 @@ public sealed class ImplementationGenerator : IIncrementalGenerator
                 }
 
                 Debugger.Break();
-                
+
 
                 // Add it to the source output
                 //sourceProductionContext.AddSource(sourceCode.FileName, sourceCode.Code);
             }
         }
-        */
     }
 }
-
-
-
-

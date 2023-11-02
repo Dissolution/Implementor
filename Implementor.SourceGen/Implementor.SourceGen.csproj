@@ -74,15 +74,15 @@
         <Using Include="System.Runtime.CompilerServices" />
         <Using Include="System.Reflection" />
         <Using Include="Implementor.Contracts" />
-        <Using Include="Jay"/>
-        <Using Include="Jay.Extensions"/>
-        <Using Include="Jay.Text.Utilities"/>
-        <Using Include="Jay.Reflection"/>
-        <Using Include="Jay.SourceGen" />
-        <Using Include="Jay.SourceGen.Reflection" />
-        <Using Include="Jay.SourceGen.Text" />
-        <Using Include="Jay.SourceGen.Extensions" />
+<!--        <Using Include="Jay"/>-->
+<!--        <Using Include="Jay.Extensions"/>-->
+<!--        <Using Include="Jay.Text.Utilities"/>-->
+<!--        <Using Include="Jay.Reflection"/>-->
+<!--        <Using Include="Jay.SourceGen" />-->
+<!--        <Using Include="Jay.SourceGen.Reflection" />-->
+<!--        <Using Include="Jay.SourceGen.Text" />-->
+<!--        <Using Include="Jay.SourceGen.Extensions" />-->
 
-        <Using Include="Jay.Easy" Static="true"/>
+<!--        <Using Include="Jay.Easy" Static="true"/>-->
     </ItemGroup>
 </Project>
