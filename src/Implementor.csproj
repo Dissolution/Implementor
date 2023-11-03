@@ -1,0 +1,62 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <IsRoslynComponent>true</IsRoslynComponent>
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+        
+        <IsPublishable>True</IsPublishable>
+        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+        <Authors>Timothy Jay</Authors>
+        <Company />
+        <Description>A source generator that creates interface implementations</Description>
+        <RepositoryUrl>https://github.com/Dissolution/Implementor</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/Dissolution/Implementor</PackageProjectUrl>
+        <PackageReadmeFile>ReadMe.md</PackageReadmeFile>
+        <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+        <PackageTags>source; generator;</PackageTags>
+        <Version>0.0.1</Version>
+        <AssemblyVersion>0.0.1</AssemblyVersion>
+        <FileVersion>0.0.1</FileVersion>
+        <RepositoryType>git</RepositoryType>
+        <PackageIcon>Implementor.png</PackageIcon>
+        <SignAssembly>False</SignAssembly>        
+        <NeutralLanguage>en</NeutralLanguage>
+        <DevelopmentDependency>true</DevelopmentDependency>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <None Include="$(OutputPath)/$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="../ReadMe.md" Pack="true" PackagePath="" Visible="false" />
+        <None Include="../Implementor.png" Pack="true" PackagePath="" Visible="false" />
+    </ItemGroup>
+
+    <!-- NuGet Packages -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0" >
+            <PrivateAssets>all</PrivateAssets>  
+        </PackageReference>
+        <PackageReference Include="PolySharp" Version="1.13.2">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <!-- Global Usings -->
+    <ItemGroup>
+        <Using Include="Microsoft.CodeAnalysis" />
+        <Using Include="System.Runtime.CompilerServices" />
+        <Using Include="System.Reflection" />
+    </ItemGroup>
+</Project>
