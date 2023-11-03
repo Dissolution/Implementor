@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Text;
+using Jay.SourceGen.Extensions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
@@ -26,15 +27,15 @@ public sealed class ImplementationGenerator : IIncrementalGenerator
             ctx.AddSource("ExampleGenerator.g", SourceText.From(code, Encoding.UTF8));
         });
 
-#if DEBUG
-        if (!Debugger.IsAttached)
-        {
-            Debugger.Launch();
-            Debug.WriteLine($"Debugger Attached");
-        }
-
-        Debugger.Break();
-#endif
+// #if DEBUG
+//         if (!Debugger.IsAttached)
+//         {
+//             Debugger.Launch();
+//             Debug.WriteLine($"Debugger Attached");
+//         }
+//
+//         Debugger.Break();
+// #endif
 
         // Initial filter for things with our attribute
         var typeDeclarations = context.SyntaxProvider
@@ -67,7 +68,7 @@ public sealed class ImplementationGenerator : IIncrementalGenerator
 
         Debugger.Break();
 
-        Jay.Debugging.Hold.Onto(147);
+        
 #endif
 
         // If we have nothing to process, exit quickly
@@ -108,7 +109,7 @@ public sealed class ImplementationGenerator : IIncrementalGenerator
                 // ImplementAttribute
                 AttributeData? implementAttributeData = typeSymbol
                     .GetAttributes()
-                    .FirstOrDefault(attr => string.Equals(attr.AttributeClass?.Name, ContractNames.ImplementAttribute.FullName));
+                    .FirstOrDefault(attr => string.Equals(attr.AttributeClass?.GetFullName(), ContractNames.ImplementAttribute.FullName));
 
                 if (implementAttributeData is null)
                 {
