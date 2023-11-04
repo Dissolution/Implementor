@@ -1,4 +1,4 @@
-﻿namespace Implementor.Attributes;
+﻿namespace Implementor;
 
 internal static class AttributeSource
 {

@@ -8,11 +8,11 @@
         <IncludeBuildOutput>false</IncludeBuildOutput>
         <IsRoslynComponent>true</IsRoslynComponent>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-        
+
         <IsPublishable>True</IsPublishable>
-        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+        <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
         <Authors>Timothy Jay</Authors>
-        <Company />
+        <Company/>
         <Description>A source generator that creates interface implementations</Description>
         <RepositoryUrl>https://github.com/Dissolution/Implementor</RepositoryUrl>
         <PackageProjectUrl>https://github.com/Dissolution/Implementor</PackageProjectUrl>
@@ -24,18 +24,17 @@
         <FileVersion>0.0.1</FileVersion>
         <RepositoryType>git</RepositoryType>
         <PackageIcon>Implementor.png</PackageIcon>
-        <SignAssembly>False</SignAssembly>        
+        <SignAssembly>False</SignAssembly>
         <NeutralLanguage>en</NeutralLanguage>
         <DevelopmentDependency>true</DevelopmentDependency>
+
+        <NoWarn>1035;</NoWarn>
+        <PolySharpUsePublicAccessibilityForGeneratedTypes>true</PolySharpUsePublicAccessibilityForGeneratedTypes>
     </PropertyGroup>
     
     <ItemGroup>
-        <None Include="$(OutputPath)/$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Include="../ReadMe.md" Pack="true" PackagePath="" Visible="false" />
-        <None Include="../Implementor.png" Pack="true" PackagePath="" Visible="false" />
+        <None Include="../ReadMe.md" Pack="true" PackagePath="" Visible="false"/>
+        <None Include="../Implementor.png" Pack="true" PackagePath="" Visible="false"/>
     </ItemGroup>
 
     <!-- NuGet Packages -->
@@ -44,8 +43,8 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0" >
-            <PrivateAssets>all</PrivateAssets>  
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0">
+            <PrivateAssets>all</PrivateAssets>
         </PackageReference>
         <PackageReference Include="PolySharp" Version="1.13.2">
             <PrivateAssets>all</PrivateAssets>
@@ -55,8 +54,13 @@
 
     <!-- Global Usings -->
     <ItemGroup>
-        <Using Include="Microsoft.CodeAnalysis" />
-        <Using Include="System.Runtime.CompilerServices" />
-        <Using Include="System.Reflection" />
+        <Using Include="System.Collections.Immutable"/>
+        <Using Include="System.Diagnostics.CodeAnalysis"/>
+        <Using Include="System.Runtime.CompilerServices"/>
+        <Using Include="System.Reflection"/>
+        <Using Include="Microsoft.CodeAnalysis"/>
+        <Using Include="Microsoft.CodeAnalysis.CSharp"/>
+        <Using Include="Microsoft.CodeAnalysis.CSharp.Syntax"/>
+        <Using Include="Implementor.Extensions"/>
     </ItemGroup>
 </Project>

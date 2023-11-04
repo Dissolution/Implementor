@@ -1,8 +1,8 @@
 ﻿using System.Text;
 using Microsoft.CodeAnalysis.Text;
-using static Implementor.Attributes.AttributeSource;
+using static Implementor.AttributeSource;
 
-namespace Implementor.Attributes;
+namespace Implementor;
 
 [Generator(LanguageNames.CSharp)]
 public sealed class AttributeGenerator : IIncrementalGenerator

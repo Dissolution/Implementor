@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Implementor", "src\Implemen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Implementor.Tests", "tests\Implementor.Tests.csproj", "{9C835E98-551B-4D9A-AC5B-885279F5E101}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Implementor.ConsoleApp", "consoleapp\Implementor.ConsoleApp.csproj", "{FFD357A5-9E9A-47E3-B973-783BB2AD2846}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleTester", "consoleapp\ConsoleTester.csproj", "{FFD357A5-9E9A-47E3-B973-783BB2AD2846}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
