@@ -1,6 +1,6 @@
 ﻿// using System.Collections;
 //
-// namespace Jay.SourceGen.Reflection;
+// namespace Implementor.Reflection;
 //
 // public sealed class SignatureAttributes : IReadOnlyList<AttributeSig>
 // {

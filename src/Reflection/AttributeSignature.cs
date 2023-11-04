@@ -1,6 +1,7 @@
-﻿// using Jay.SourceGen.Collections;
+﻿// using Implementor.Collections;
+// using Implementor.Utilities;
 //
-// namespace Jay.SourceGen.Reflection;
+// namespace Implementor.Reflection;
 //
 // public sealed class AttributeSig : Sig,
 //         IEquatable<AttributeSig>,

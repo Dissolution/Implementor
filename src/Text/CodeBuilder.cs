@@ -187,7 +187,7 @@ public sealed class CodeBuilder : IDisposable
         }
         else
         {
-            throw new NotImplementedException();
+            str = value?.ToString();
         }
 
         // Write the finalized string
@@ -207,6 +207,9 @@ public sealed class CodeBuilder : IDisposable
         }
         return Append(str);
     }
+
+    public CodeBuilder Append<T>(T? value, Casing casing)
+        => Append(value?.ToString().ToCase(casing));
 
     public CodeBuilder NewLine()
     {
@@ -386,6 +389,9 @@ public sealed class CodeBuilder : IDisposable
         return this;
     }
 
+    public CodeBuilder Delimit<T>(string delimiter, IEnumerable<T> values, Action<CodeBuilder, T> perValue)
+        => this.Delimit<T>(b => b.Append(delimiter), values, perValue);
+    
     public CodeBuilder If(bool result, Action<CodeBuilder>? ifTrue, Action<CodeBuilder>? ifFalse = null)
     {
         if (result)

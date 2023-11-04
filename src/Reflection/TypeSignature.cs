@@ -1,4 +1,4 @@
-﻿// namespace Jay.SourceGen.Reflection;
+﻿// namespace Implementor.Reflection;
 //
 // public sealed class TypeSig : MemberSig,
 //     IEquatable<TypeSig>, IEquatable<ITypeSymbol>, IEquatable<Type>

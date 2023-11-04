@@ -1,4 +1,4 @@
-﻿namespace Implementor;
+﻿namespace Implementor.Reflection;
 
 [Flags]
 public enum Visibility

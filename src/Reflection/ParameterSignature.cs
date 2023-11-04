@@ -1,7 +1,4 @@
-﻿// using System.Runtime.CompilerServices;
-// using static Jay.StaticImports;
-//
-// namespace Jay.SourceGen.Reflection;
+﻿// namespace Implementor.Reflection;
 //
 // public sealed class ParameterSig :
 //     Sig,
@@ -87,7 +84,7 @@
 //
 //     public bool Equals(ParameterSig? parameterSig)
 //     {
-//         return base.Equals(parameterSig)
+//         return ((Object)this).Equals(parameterSig)
 //             && FastEqual(ParameterType, parameterSig.ParameterType)
 //             && FastEqual(DefaultValue, parameterSig.DefaultValue)
 //             && FastEqual(IsParams, parameterSig.IsParams);

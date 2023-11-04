@@ -1,4 +1,4 @@
-﻿// namespace Jay.SourceGen.Reflection;
+﻿// namespace Implementor.Reflection;
 //
 // public abstract class MemberSig : Sig,
 //     IEquatable<MemberSig>, IEquatable<ISymbol>, IEquatable<MemberInfo>
@@ -115,7 +115,7 @@
 //
 //     public virtual bool Equals(MemberSig? memberSig)
 //     {
-//         return base.Equals(memberSig)
+//         return ((Object)this).Equals(memberSig)
 //             && FastEqual(ParentType, memberSig.ParentType)
 //             && FastEqual(Attributes, memberSig.Attributes);
 //     }

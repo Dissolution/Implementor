@@ -1,67 +1,74 @@
-﻿// namespace Jay.SourceGen.Reflection;
-//
-// public static class KeywordsExtensions
-// {
-//     public static Keywords GetKeywords(this ISymbol? symbol)
-//     {
-//         Keywords keywords = default;
-//          if (symbol is null)
-//              return keywords;
-//         if (symbol.IsAbstract)
-//             keywords.AddFlag(Keywords.Abstract);
-//         if (symbol.IsSealed)
-//             keywords.AddFlag(Keywords.Sealed);
-//         if (symbol.IsVirtual)
-//             keywords.AddFlag(Keywords.Virtual);
-//         if (symbol.IsExtern)
-//             keywords.AddFlag(Keywords.Extern);
-//         if (symbol.IsOverride)
-//             keywords.AddFlag(Keywords.Override);a
-//         switch (symbol)
-//         {
-//             case IFieldSymbol fieldSymbol:
-//             {
-//                 if (fieldSymbol.IsConst)
-//                     keywords.AddFlag(Keywords.Const);
-//                 if (fieldSymbol.IsRequired)
-//                     keywords.AddFlag(Keywords.Required);
-//                 if (fieldSymbol.IsVolatile)
-//                     keywords.AddFlag(Keywords.Volatile);
-//                 if (fieldSymbol.IsReadOnly)
-//                     keywords.AddFlag(Keywords.Readonly);
-//                 return keywords;
-//             }
-//             case IMethodSymbol methodSymbol:
-//             {
-//                 if (methodSymbol.IsInitOnly)
-//                     keywords.AddFlag(Keywords.Init);
-//                 if (methodSymbol.IsReadOnly)
-//                     keywords.AddFlag(Keywords.Readonly);
-//                 if (methodSymbol.IsAsync)
-//                     keywords.AddFlag(Keywords.Async);
-//                 return keywords;
-//             }
-//             case IEventSymbol eventSymbol:
-//             {
-//                 keywords.AddFlag(GetKeywords(eventSymbol.AddMethod));
-//                 keywords.AddFlag(GetKeywords(eventSymbol.RemoveMethod));
-//                 keywords.AddFlag(GetKeywords(eventSymbol.RaiseMethod));
-//                 return keywords;
-//             }
-//             case IPropertySymbol propertySymbol:
-//             {
-//                 keywords.AddFlag(GetKeywords(propertySymbol.GetMethod));
-//                 keywords.AddFlag(GetKeywords(propertySymbol.SetMethod));
-//                 return keywords;
-//             }
-//             case ITypeSymbol typeSymbol:
-//             {
-//                 if (typeSymbol.IsReadOnly)
-//                     keywords.AddFlag(Keywords.Readonly);
-//                 return keywords;
-//             }
-//             default:
-//                 return keywords;
-//         }
-//     }
-// }
+﻿namespace Implementor.Reflection;
+
+public static class KeywordsExtensions
+{
+    public static Keywords GetKeywords(this ISymbol? symbol)
+    {
+        Keywords keywords = new();
+        AddKeywords(keywords, symbol);
+        return keywords;
+    }
+
+    private static void AddKeywords(Keywords keywords, ISymbol? symbol)
+    {
+        if (symbol is null) return;
+        
+        if (symbol.IsAbstract)
+            keywords.Add("abstract");
+        if (symbol.IsSealed)
+            keywords.Add("sealed");
+        if (symbol.IsVirtual)
+            keywords.Add("virtual");
+        if (symbol.IsExtern)
+            keywords.Add("extern");
+        if (symbol.IsOverride)
+            keywords.Add("override");
+        
+        switch (symbol)
+        {
+            case IFieldSymbol fieldSymbol:
+            {
+                if (fieldSymbol.IsConst)
+                    keywords.Add("const");
+                if (fieldSymbol.IsRequired)
+                    keywords.Add("required");
+                if (fieldSymbol.IsVolatile)
+                    keywords.Add("volatile");
+                if (fieldSymbol.IsReadOnly)
+                    keywords.Add("readonly");
+                return;
+            }
+            case IMethodSymbol methodSymbol:
+            {
+                if (methodSymbol.IsInitOnly)
+                    keywords.Add("init");
+                if (methodSymbol.IsReadOnly)
+                    keywords.Add("readonly");
+                if (methodSymbol.IsAsync)
+                    keywords.Add("async");
+                return;
+            }
+            case IEventSymbol eventSymbol:
+            {
+                AddKeywords(keywords, eventSymbol.AddMethod);
+                AddKeywords(keywords, eventSymbol.RemoveMethod);
+                AddKeywords(keywords, eventSymbol.RaiseMethod);
+                return;
+            }
+            case IPropertySymbol propertySymbol:
+            {
+                AddKeywords(keywords, propertySymbol.GetMethod);
+                AddKeywords(keywords, propertySymbol.SetMethod);
+                return;
+            }
+            case ITypeSymbol typeSymbol:
+            {
+                if (typeSymbol.IsReadOnly)
+                    keywords.Add("readonly");
+                return;
+            }
+            default:
+                return;
+        }
+    }
+}

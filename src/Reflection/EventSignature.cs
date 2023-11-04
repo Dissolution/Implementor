@@ -1,4 +1,4 @@
-﻿// namespace Jay.SourceGen.Reflection;
+﻿// namespace Implementor.Reflection;
 //
 // public sealed class EventSig : MemberSig,
 //     IEquatable<EventSig>, IEquatable<IEventSymbol>, IEquatable<EventInfo>

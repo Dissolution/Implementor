@@ -1,4 +1,7 @@
-﻿namespace Implementor.Extensions;
+﻿using Implementor.Reflection;
+using Implementor.Text;
+
+namespace Implementor.Extensions;
 
 public static class VisibilityExtensions
 {
@@ -26,5 +29,19 @@ public static class VisibilityExtensions
         else
             visibility |= Visibility.Instance;
         return visibility;
+    }
+
+    public static void WriteTo(this Visibility visibility, CodeBuilder codeBuilder)
+    {
+        if (visibility.HasFlag(Visibility.Static))
+            codeBuilder.Append("static ");
+        if (visibility.HasFlag(Visibility.Private))
+            codeBuilder.Append("private ");
+        if (visibility.HasFlag(Visibility.Protected))
+            codeBuilder.Append("protected ");
+        if (visibility.HasFlag(Visibility.Internal))
+            codeBuilder.Append("internal ");
+        if (visibility.HasFlag(Visibility.Public))
+            codeBuilder.Append("public ");
     }
 }

@@ -1,4 +1,4 @@
-﻿// namespace Jay.SourceGen.Reflection;
+﻿// namespace Implementor.Reflection;
 //
 // public sealed class PropertySig : MemberSig,
 //     IEquatable<PropertySig>, IEquatable<IPropertySymbol>, IEquatable<PropertyInfo>

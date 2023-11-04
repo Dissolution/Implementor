@@ -1,4 +1,4 @@
-﻿// namespace Jay.SourceGen.Reflection;
+﻿// namespace Implementor.Reflection;
 //
 // public sealed class FieldSig : MemberSig,
 //     IEquatable<FieldSig>, IEquatable<IFieldSymbol>, IEquatable<FieldInfo>

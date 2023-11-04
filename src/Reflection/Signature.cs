@@ -1,18 +1,11 @@
-﻿// namespace Jay.SourceGen.Reflection;
+﻿// using Implementor.Utilities;
+//
+// namespace Implementor.Reflection;
 //
 // public abstract class Sig : IEquatable<Sig>
 // {
-//     public static implicit operator Sig(FieldInfo fieldInfo) => new FieldSig(fieldInfo);
-//     public static implicit operator Sig(PropertyInfo propertyInfo) => new PropertySig(propertyInfo);
-//     public static implicit operator Sig(EventInfo eventInfo) => new EventSig(eventInfo);
-//     public static implicit operator Sig(ConstructorInfo ctorInfo) => new MethodSig(ctorInfo);
-//     public static implicit operator Sig(MethodInfo methodInfo) => new MethodSig(methodInfo);
-//     public static implicit operator Sig(ParameterInfo parameterInfo) => new ParameterSig(parameterInfo);
-//     public static implicit operator Sig(AttributeData attributeData) => new AttributeSig(attributeData);
-//     public static implicit operator Sig(CustomAttributeData customAttrData) => new AttributeSig(customAttrData);
-//
-//     public static bool operator ==(Sig? left, Sig? right) => FastEqual(left, right);
-//     public static bool operator !=(Sig? left, Sig? right) => !FastEqual(left, right);
+//     public static bool operator ==(Sig? left, Sig? right) => EqualityComparer<Sig>.Default.Equals(left!, right!);
+//     public static bool operator !=(Sig? left, Sig? right) => !(left == right);
 //     
 //     public static bool TryCreate([AllowNull, NotNullWhen(true)] object? obj, [NotNullWhen(true)] out Sig? signature)
 //     {
@@ -62,25 +55,17 @@
 //                 return false;
 //         }
 //     }
-//     
-//     public string Name { get; }
-//     public Visibility Visibility { get; }
-//     public Keywords Keywords { get; }
 //
-//     protected Sig(string name, Visibility visibility, Keywords keywords)
-//     {
-//         this.Name = name;
-//         this.Visibility = visibility;
-//         this.Keywords = keywords;
-//     }
+//     public string? Name { get; set; } = null;
+//     public Visibility Visibility { get; set; } = Visibility.None;
+//     public Keywords Keywords { get; } = new();
 //
 //     public virtual bool Equals(Sig? signature)
 //     {
-//         return signature is not null 
-//             && TypeEqual(this, signature) 
-//             && TextEqual(Name, signature.Name) 
-//             && FastEqual(Visibility, signature.Visibility) 
-//             && FastEqual(Keywords, signature.Keywords);
+//         return signature is not null &&
+//             string.Equals(this.Name, signature.Name) &&
+//             this.Visibility == signature.Visibility &&
+//             this.Keywords.SetEquals(signature.Keywords);
 //     }
 //     
 //     public override bool Equals(object? obj)
