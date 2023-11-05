@@ -13,7 +13,6 @@ public sealed record class InterfaceImplementation(
     string Code,
     Type[] CtorParamTypes);
 
-
 public class ImplementationBuilder
 {
     public TypeDeclarationSyntax TypeDeclaration { get; }
@@ -70,24 +69,46 @@ public class ImplementationBuilder
 
     private void WriteProperties(CodeBuilder codeBuilder)
     {
-        
+        codeBuilder.Delimit(static b => b.NewLine(), _properties, (cb, property) => cb
+            .Append(property.Visibility).Append(' ')
+            .AppendIf(property.Keywords, ' ')
+            .If(property.IsIndexer, ib => ib
+                    .Append("this[")
+                    .Delimit(", ", property.Parameters, static (b, p) => b
+                        .Append(p.ValueType)
+                        .Append(' ')
+                        .Append(p.Name)
+                        .If(p.DefaultValue.HasValue, d => d.Append(" = ").Append(p.DefaultValue.Value)))
+                    .Append(']'),
+                b =>
+                {
+                    Debug.Assert(property.Parameters.Count == 0);
+                    b.Append(property.Name);
+                })
+            .Append(" {")
+            .If(property.Getter is not null, g => g
+                .If(property.Getter!.Visibility != property.Visibility,
+                    b => b.Append(property.Getter.Visibility))
+                .Append(" get;"))
+            .If(property.Setter is not null, s => s
+                .If(property.Setter!.Visibility != property.Visibility,
+                    b => b.Append(property.Setter.Visibility))
+                .Append(" set;"))
+            .Append(" }"));
     }
 
     private void WriteEvents(CodeBuilder codeBuilder)
     {
-        
     }
 
     private void WriteConstructors(CodeBuilder codeBuilder)
     {
-        
     }
 
     private void WriteMethods(CodeBuilder codeBuilder)
     {
-        
     }
-    
+
     public InterfaceImplementation GetSourceFile()
     {
         // What interfaces do we implement?
@@ -116,19 +137,19 @@ public class ImplementationBuilder
             .Namespace(@namespace)
             .Code
             .Append($$"""
-                public class {{className}} : {{interfaceName}}
-                {
-                    {{(CBA)WriteFields}}  
-                
-                    {{(CBA)WriteProperties}}
-                    
-                    {{(CBA)WriteEvents}}
-                    
-                    {{(CBA)WriteConstructors}}
-                    
-                    {{(CBA)WriteMethods}}
-                }
-                """);
+                      public class {{className}} : {{interfaceName}}
+                      {
+                          {{(CBA)WriteFields}}
+                      
+                          {{(CBA)WriteProperties}}
+                          
+                          {{(CBA)WriteEvents}}
+                          
+                          {{(CBA)WriteConstructors}}
+                          
+                          {{(CBA)WriteMethods}}
+                      }
+                      """);
 
         string code = fileBuilder.GetSourceCode();
 

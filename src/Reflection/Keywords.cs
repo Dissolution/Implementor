@@ -3,9 +3,17 @@ using Implementor.Utilities;
 
 namespace Implementor.Reflection;
 
-public sealed class Keywords : HashSet<string>
+public sealed class Keywords : HashSet<string>, IToCode
 {
     public Keywords() : base(StringComparer.OrdinalIgnoreCase) { }
+
+    public bool WriteTo(CodeBuilder codeBuilder)
+    {
+        if (this.Count == 0)
+            return false;
+        codeBuilder.Delimit(" ", this, static (cb, kw) => cb.Append(kw, Casing.Lower));
+        return true;
+    }
 
     public override bool Equals(object? obj)
     {
