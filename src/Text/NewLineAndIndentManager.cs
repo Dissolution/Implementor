@@ -2,30 +2,32 @@
 
 namespace Implementor.Text;
 
-public sealed class IndentManager : IDisposable
+public sealed class NewLineAndIndentManager : IDisposable
 {
-    private char[] _indents;
-    private int _indentsPosition;
+    private char[] _buffer;
+    private int _bufferPosition;
     private readonly Stack<int> _indentOffsets;
 
-    public ReadOnlySpan<char> CurrentIndent => _indents.AsSpan(0, _indentsPosition);
+    public ReadOnlySpan<char> CurrentNewLineAndIndent => _buffer.AsSpan(0, _bufferPosition);
     
-    public IndentManager()
+    public NewLineAndIndentManager()
     {
-        _indents = ArrayPool<char>.Shared.Rent(1024);
-        _indentsPosition = 0;
-        _indentOffsets = new(0);
+        _buffer = ArrayPool<char>.Shared.Rent(1024);
+        var newLine = CodeBuilder.DefaultNewLine.AsSpan();
+        newLine.CopyTo(_buffer);
+        _bufferPosition = newLine.Length;
+        _indentOffsets = new();
     }
     
     public void AddIndent(char indent)
     {
-        int pos = _indentsPosition;
+        int pos = _bufferPosition;
         int newPos = pos + 1;
-        if (newPos > _indents.Length)
+        if (newPos > _buffer.Length)
             throw new InvalidOperationException();
         _indentOffsets.Push(pos);
-        _indents[pos] = indent;
-        _indentsPosition = newPos;
+        _buffer[pos] = indent;
+        _bufferPosition = newPos;
     }
 
     public void AddIndent(string? indent) => AddIndent(indent.AsSpan());
@@ -33,20 +35,20 @@ public sealed class IndentManager : IDisposable
 
     public void AddIndent(scoped ReadOnlySpan<char> indent)
     {
-        int pos = _indentsPosition;
+        int pos = _bufferPosition;
         int newPos = pos + indent.Length;
-        if (newPos > _indents.Length)
+        if (newPos > _buffer.Length)
             throw new InvalidOperationException();
         _indentOffsets.Push(pos);
-        indent.CopyTo(_indents.AsSpan(pos));
-        _indentsPosition = newPos;
+        indent.CopyTo(_buffer.AsSpan(pos));
+        _bufferPosition = newPos;
     }
 
     public void RemoveIndent()
     {
         if (_indentOffsets.Count > 0)
         {
-            _indentsPosition = _indentOffsets.Pop();
+            _bufferPosition = _indentOffsets.Pop();
         }
     }
 
@@ -55,8 +57,8 @@ public sealed class IndentManager : IDisposable
         if (_indentOffsets.Count > 0)
         {
             var lastIndentIndex = _indentOffsets.Pop();
-            lastIndent = _indents.AsSpan()[new Range(start: lastIndentIndex, end: _indentsPosition)];
-            _indentsPosition = lastIndentIndex;
+            lastIndent = _buffer.AsSpan()[new Range(start: lastIndentIndex, end: _bufferPosition)];
+            _bufferPosition = lastIndentIndex;
         }
         else
         {
@@ -67,8 +69,8 @@ public sealed class IndentManager : IDisposable
     
     public void Dispose()
     {
-        char[]? toReturn = _indents;
-        _indents = null!;
+        char[]? toReturn = _buffer;
+        _buffer = null!;
         if (toReturn is not null)
         {
             ArrayPool<char>.Shared.Return(toReturn);

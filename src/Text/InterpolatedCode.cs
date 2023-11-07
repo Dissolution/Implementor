@@ -18,17 +18,17 @@ public ref struct InterpolatedCode
 
     public void AppendLiteral(string str)
     {
-        _codeBuilder.Append(str.AsSpan());
+        _codeBuilder.WriteIndentAwareText(str.AsSpan());
     }
 
     public void AppendFormatted(scoped ReadOnlySpan<char> text)
     {
-        _codeBuilder.Append(text);
+        _codeBuilder.WriteIndentAwareText(text);
     }
 
     public void AppendFormatted(string? str)
     {
-        _codeBuilder.Append(str.AsSpan());
+        _codeBuilder.WriteIndentAwareText(str.AsSpan());
     }
     
     public void AppendFormatted<T>([AllowNull] T value)

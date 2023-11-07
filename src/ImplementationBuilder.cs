@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using Implementor.Reflection;
-using Implementor.Scratch;
 using Implementor.Text;
 using Implementor.Utilities;
 
@@ -38,6 +37,8 @@ public class ImplementationBuilder
     private void ImplementProperty(IPropertySymbol propertySymbol)
     {
         var propertySignature = PropertySignature.Create(propertySymbol)!;
+        // We're implementing this
+        propertySignature.Keywords.Remove("abstract");
         var fieldName = Naming.GetFieldName(propertySymbol);
         var fieldSignature = new FieldSignature
         {
@@ -47,31 +48,31 @@ public class ImplementationBuilder
         };
         if (propertySignature.Setter is null)
             fieldSignature.Keywords.Add("readonly");
+        propertySignature.BackingField = fieldSignature;
 
         _fields.Add(fieldSignature);
         _properties.Add(propertySignature);
-        Debugger.Break();
+        //Debugger.Break();
     }
 
 
     private void WriteFields(CodeBuilder codeBuilder)
     {
-        codeBuilder.Enumerate(_fields, (cb, field) =>
-        {
-            field.Visibility.WriteTo(cb);
-            cb.Append(field.Keywords)
-                .Append(' ')
-                .Append(field.Name)
-                .Append(';')
-                .NewLine();
-        });
+        codeBuilder.Enumerate(_fields, (cb, field) => cb
+            .IfAppend(field.Visibility, ' ')
+            .IfAppend(field.Keywords, ' ')
+            .IfAppend(field.ValueType, ' ')
+            .Append(field.Name!)
+            .Append(';')
+            .NewLine());
     }
 
     private void WriteProperties(CodeBuilder codeBuilder)
     {
         codeBuilder.Delimit(static b => b.NewLine(), _properties, (cb, property) => cb
-            .Append(property.Visibility).Append(' ')
-            .AppendIf(property.Keywords, ' ')
+            .IfAppend(property.Visibility, ' ')
+            .IfAppend(property.Keywords, ' ')
+            .IfAppend(property.ValueType, ' ')
             .If(property.IsIndexer, ib => ib
                     .Append("this[")
                     .Delimit(", ", property.Parameters, static (b, p) => b
@@ -85,16 +86,28 @@ public class ImplementationBuilder
                     Debug.Assert(property.Parameters.Count == 0);
                     b.Append(property.Name);
                 })
-            .Append(" {")
-            .If(property.Getter is not null, g => g
-                .If(property.Getter!.Visibility != property.Visibility,
-                    b => b.Append(property.Getter.Visibility))
-                .Append(" get;"))
-            .If(property.Setter is not null, s => s
-                .If(property.Setter!.Visibility != property.Visibility,
-                    b => b.Append(property.Setter.Visibility))
-                .Append(" set;"))
-            .Append(" }"));
+            .If(property.BackingField is null,
+                nfb => nfb
+                    .Append(" {")
+                    .If(property.Getter is not null, g => g
+                        .If(property.Getter!.Visibility != property.Visibility,
+                            b => b.Append(property.Getter.Visibility))
+                        .Append(" get;"))
+                    .If(property.Setter is not null, s => s
+                        .If(property.Setter!.Visibility != property.Visibility,
+                            b => b.Append(property.Setter.Visibility))
+                        .Append(" set;"))
+                    .Append(" }"),
+                fb => fb
+                    .If(property.Setter is null,
+                        g => g.Append($" => {property.BackingField!.Name};"),
+                        s => s.NewLine()
+                            .Append($$"""
+                                      {
+                                          get => {{property.BackingField!.Name}};
+                                          set => {{property.BackingField.Name}} = value;
+                                      }
+                                      """))));
     }
 
     private void WriteEvents(CodeBuilder codeBuilder)
@@ -103,6 +116,10 @@ public class ImplementationBuilder
 
     private void WriteConstructors(CodeBuilder codeBuilder)
     {
+        // Look for required fields
+        var requiredFields = _fields.Where(f => f.Keywords.Contains("readonly")).ToList();
+        // Then optional fields
+        var optionalFields = _fields.Where(f => !f.Keywords.Contains("readonly")).ToList();
     }
 
     private void WriteMethods(CodeBuilder codeBuilder)
@@ -140,19 +157,16 @@ public class ImplementationBuilder
                       public class {{className}} : {{interfaceName}}
                       {
                           {{(CBA)WriteFields}}
-                      
                           {{(CBA)WriteProperties}}
-                          
                           {{(CBA)WriteEvents}}
-                          
                           {{(CBA)WriteConstructors}}
-                          
                           {{(CBA)WriteMethods}}
                       }
                       """);
 
         string code = fileBuilder.GetSourceCode();
-
+        Console.Clear();
+        Console.WriteLine(code);
         return new(@namespace, interfaceName, className, code, Array.Empty<Type>());
     }
 }

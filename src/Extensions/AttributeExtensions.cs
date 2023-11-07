@@ -1,4 +1,4 @@
-﻿using Implementor.Collections;
+﻿using Implementor.Reflection;
 
 namespace Implementor.Extensions;
 
@@ -6,7 +6,7 @@ public static class AttributeExtensions
 {
     public static AttributeArguments GetArguments(this AttributeData attributeData)
     {
-        return AttributeArguments.Create(attributeData);
+        return AttributeArguments.From(attributeData);
     }
 
     // public static AttributeArguments GetArguments(this CustomAttributeData customAttributeData)

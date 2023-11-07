@@ -5,5 +5,5 @@ namespace ConsoleTester.Interfaces;
 [Implement]
 public interface ITest
 {
-    int Id { get; }
+    int Id { get; set; }
 }

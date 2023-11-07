@@ -28,5 +28,6 @@
 
     <ItemGroup>
         <Using Include="Xunit"/>
+        <Using Include="Implementor"/>
     </ItemGroup>
 </Project>

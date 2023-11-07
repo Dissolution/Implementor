@@ -5,7 +5,7 @@ using ConsoleTester.Interfaces;
 
 //Test test = new();
 ITest test = Implementation.OfITest();
-string? str = test?.ToString();
+string? str = test?.Id.ToString();
 Console.WriteLine(str);
 
 Debugger.Break();

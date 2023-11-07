@@ -30,6 +30,13 @@ public static class VisibilityExtensions
             visibility |= Visibility.Instance;
         return visibility;
     }
+    
+    public static Visibility GetVisibility(this MemberInfo? member)
+    {
+        Visibility vis = default;
+        if (member is null) return vis;
+        throw new NotImplementedException();
+    }
 
     public static void WriteTo(this Visibility visibility, CodeBuilder codeBuilder)
     {

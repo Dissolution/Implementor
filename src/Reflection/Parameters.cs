@@ -1,4 +1,4 @@
-﻿namespace Implementor.Scratch;
+﻿namespace Implementor.Reflection;
 
 public sealed class Parameters : List<ParameterSignature>
 {
@@ -12,6 +12,15 @@ public sealed class Parameters : List<ParameterSignature>
                     .Where(static p => p is not null)!);
         }
 
+        return parameters;
+    }
+    
+    public static Parameters From(ParameterInfo[] parameterInfos)
+    {
+        var parameters = new Parameters();
+        parameters.AddRange(parameterInfos
+            .Select(static p => ParameterSignature.Create(p))
+            .Where(static p => p is not null)!);
         return parameters;
     }
 }

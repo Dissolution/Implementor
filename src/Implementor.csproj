@@ -9,7 +9,7 @@
         <IsRoslynComponent>true</IsRoslynComponent>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 
-        <IsPublishable>True</IsPublishable>
+        <IsPublishable>False</IsPublishable>
         <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
         <Authors>Timothy Jay</Authors>
         <Company/>
@@ -62,5 +62,8 @@
         <Using Include="Microsoft.CodeAnalysis.CSharp"/>
         <Using Include="Microsoft.CodeAnalysis.CSharp.Syntax"/>
         <Using Include="Implementor.Extensions"/>
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Collections\" />
     </ItemGroup>
 </Project>

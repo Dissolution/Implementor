@@ -3,19 +3,13 @@ using System.Diagnostics;
 
 namespace Implementor.Text;
 
-/// <summary>
-/// <b>C</b>ode <b>B</b>uilder <b>A</b>ction<br/>
-/// <see cref="Action{T}">Action&lt;CodeBuilder&gt;</see>
-/// </summary>
-public delegate void CBA(CodeBuilder codeBuilder);
-
 public sealed class CodeBuilder : IDisposable
 {
-    public static string DefaultNewLine { get; set; } = SyntaxFactory.ElasticCarriageReturnLineFeed.ToFullString();
+    public static string DefaultNewLine { get; set; } = "\r\n";
+    
     public static CodeBuilder New => new();
-
-
-    private IndentManager _indentManager = new();
+    
+    private readonly NewLineAndIndentManager _newLineAndIndentManager = new();
     private char[] _chars = ArrayPool<char>.Shared.Rent(128 * 1024);
     private int _length = 0;
 
@@ -40,46 +34,45 @@ public sealed class CodeBuilder : IDisposable
     /// <returns></returns>
     private ReadOnlySpan<char> GetCurrentIndent()
     {
-        var newLine = DefaultNewLine.AsSpan();
+        var nli = _newLineAndIndentManager.CurrentNewLineAndIndent;
         var written = this.Written;
-        var i = written.LastIndexOf<char>(newLine);
+        var i = written.LastIndexOf<char>(nli);
         if (i == -1)
         {
+            // No new indent
             return default;
         }
-        else
-        {
-            return written.Slice(i + newLine.Length);
-        }
+
+        var indent = written.Slice(i + nli.Length);
+        //string ind = indent.ToString();
+        return indent;
     }
 
     internal void IndentAwareAction(CBA cba)
     {
         var newIndent = GetCurrentIndent();
-        _indentManager.AddIndent(newIndent);
-        cba(this);
-#if DEBUG
-        _indentManager.RemoveIndent(out var removedIndent);
-        if (!newIndent.SequenceEqual(removedIndent))
+        if (newIndent.Length == 0)
         {
-            var ni = newIndent.ToString();
-            var ri = removedIndent.ToString();
-            Debugger.Break();
+            cba(this);
         }
-        //Debug.Assert(newIndent.SequenceEqual(removedIndent));
+        else
+        {
+            _newLineAndIndentManager.AddIndent(newIndent);
+            cba(this);
+#if DEBUG
+            _newLineAndIndentManager.RemoveIndent(out var removedIndent);
+            Debug.Assert(newIndent.SequenceEqual(removedIndent));
+
 #else
-        _indentManager.RemoveIndent();
+            _newLineAndIndentManager.RemoveIndent();
 #endif
+        }
     }
 
     internal void WriteIndentAwareText(ReadOnlySpan<char> text)
     {
-        var newLine = DefaultNewLine;
-        var newIndent = GetCurrentIndent();
-        _indentManager.AddIndent(newIndent);
-        
-        // Replace embedded NewLines with NewLine+Indent
-        var split = text.TextSplit(newLine);
+        // Replace embedded NewLines with NewLine + Indent
+        var split = text.TextSplit(DefaultNewLine);
         while (split.MoveNext())
         {
             this.Append(split.Text);
@@ -88,15 +81,9 @@ public sealed class CodeBuilder : IDisposable
                 this.NewLine().Append(split.Text);
             }
         }
-#if DEBUG
-        _indentManager.RemoveIndent(out var removedIndent);
-        Debug.Assert(newIndent.SequenceEqual(removedIndent));
-#else
-        _indentManager.RemoveIndent();
-#endif
     }
 
-    internal void WriteIndentAwareValue<T>([AllowNull] T value)
+    internal void WriteIndentAwareValue<T>(T? value)
     {
         switch (value)
         {
@@ -175,7 +162,7 @@ public sealed class CodeBuilder : IDisposable
         return this;
     }
 
-    public CodeBuilder Append<T>([AllowNull] T value)
+    public CodeBuilder Append<T>(T? value)
     {
         // Intercept Code Builder Actions
         if (value is CBA codeBuilderAction)
@@ -183,29 +170,16 @@ public sealed class CodeBuilder : IDisposable
             IndentAwareAction(codeBuilderAction);
             return this;
         }
+
         // Use the ToCodeHelper
         ToCodeHelper.WriteValueTo<T>(value, this);
         return this;
     }
 
-    public CodeBuilder AppendIf<T>(T? value, char spacer)
+    public CodeBuilder IfAppend<T>(T? value, char spacer)
     {
-        // Intercept Code Builder Actions
-        if (value is CBA codeBuilderAction)
-        {
-            int pos = _length;
-            IndentAwareAction(codeBuilderAction);
-            if (_length != pos)
-            {
-                return Append(spacer);
-            }
-            return this;
-        }
-        // Use the ToCodeHelper
-        if (ToCodeHelper.WriteValueTo<T>(value, this))
-        {
+        if (this.Wrote(cb => cb.Append<T>(value)))
             return Append(spacer);
-        }
         return this;
     }
 
@@ -229,7 +203,7 @@ public sealed class CodeBuilder : IDisposable
 
     public CodeBuilder NewLine()
     {
-        return Append(DefaultNewLine).Append(_indentManager.CurrentIndent);
+        return Append(_newLineAndIndentManager.CurrentNewLineAndIndent);
     }
 
     /// <summary>
@@ -342,7 +316,7 @@ public sealed class CodeBuilder : IDisposable
         }
     }
 
-    public CodeBuilder Enumerate<T>(IEnumerable<T> values, Action<CodeBuilder, T> perValue)
+    public CodeBuilder Enumerate<T>(IEnumerable<T> values, CBVA<T> perValue)
     {
         foreach (var value in values)
         {
@@ -379,7 +353,7 @@ public sealed class CodeBuilder : IDisposable
         return this;
     }
 
-    public CodeBuilder Delimit<T>(Action<CodeBuilder> delimit, IEnumerable<T> values, Action<CodeBuilder, T> perValue)
+    public CodeBuilder Delimit<T>(Action<CodeBuilder> delimit, IEnumerable<T> values, CBVA<T> perValue)
     {
         if (values is IList<T> list)
         {
@@ -411,10 +385,10 @@ public sealed class CodeBuilder : IDisposable
         return this;
     }
 
-    public CodeBuilder Delimit<T>(string delimiter, IEnumerable<T> values, Action<CodeBuilder, T> perValue)
+    public CodeBuilder Delimit<T>(string delimiter, IEnumerable<T> values, CBVA<T> perValue)
         => this.Delimit<T>(b => b.Append(delimiter), values, perValue);
 
-    public CodeBuilder If(bool result, Action<CodeBuilder>? ifTrue, Action<CodeBuilder>? ifFalse = null)
+    public CodeBuilder If(bool result, CBA? ifTrue, CBA? ifFalse = null)
     {
         if (result)
         {
@@ -428,12 +402,31 @@ public sealed class CodeBuilder : IDisposable
         return this;
     }
 
-    public CodeBuilder Invoke(Action<CodeBuilder> build)
+    public CodeBuilder Invoke(CBA build)
     {
         build(this);
         return this;
     }
 
+    public bool Wrote(CBA build)
+    {
+        int pos = _length;
+        build(this);
+        return _length > pos;
+    }
+    
+    public bool TryRemove(Range range)
+    {
+        int pos = _length;
+        (int offset, int length) = range.GetOffsetAndLength(pos);
+        if (offset + length >= pos)
+        {
+            _length = offset;
+            return true;
+        }
+
+        throw new NotImplementedException();
+    }
 
     public void Clear()
     {
@@ -442,6 +435,7 @@ public sealed class CodeBuilder : IDisposable
 
     public void Dispose()
     {
+        _newLineAndIndentManager.Dispose();
         char[]? toReturn = _chars;
         _chars = null!;
         if (toReturn is not null)

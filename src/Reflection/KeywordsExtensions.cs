@@ -9,6 +9,11 @@ public static class KeywordsExtensions
         return keywords;
     }
 
+    public static Keywords GetKeywords(this MemberInfo? member)
+    {
+        throw new NotImplementedException();
+    }
+
     private static void AddKeywords(Keywords keywords, ISymbol? symbol)
     {
         if (symbol is null) return;
