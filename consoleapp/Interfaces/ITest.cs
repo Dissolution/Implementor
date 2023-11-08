@@ -3,6 +3,7 @@
 namespace ConsoleTester.Interfaces;
 
 [Implement]
+// [Entity]
 public interface ITest
 {
     int Id { get; set; }

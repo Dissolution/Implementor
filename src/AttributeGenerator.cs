@@ -14,6 +14,9 @@ public sealed class AttributeGenerator : IIncrementalGenerator
             ctx.AddSource(
                 $"{ImplementAttribute.Name}.g.cs",
                 SourceText.From(ImplementAttribute.Code, Encoding.UTF8));
+            // ctx.AddSource(
+            //     $"{EntityAttribute.Name}.g.cs",
+            //     SourceText.From(EntityAttribute.Code, Encoding.UTF8));
         });
     }
 }
