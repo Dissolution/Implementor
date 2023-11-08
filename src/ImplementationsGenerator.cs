@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Text;
-using Implementor.Text;
 using Microsoft.CodeAnalysis.Text;
 using static Implementor.AttributeSource;
 
@@ -32,6 +31,8 @@ public sealed class ImplementationsGenerator : IIncrementalGenerator
         var compilationAndTypeDeclarations = context.CompilationProvider
             .Combine(typeDeclarations.Collect());
 
+        Console.WriteLine(Assembly.GetExecutingAssembly().Location);
+        
         // Send for further processing
         context.RegisterSourceOutput(compilationAndTypeDeclarations,
             static (sourceContext, catd) => Process(catd.Left, sourceContext, catd.Right));

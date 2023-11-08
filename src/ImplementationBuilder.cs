@@ -1,7 +1,4 @@
 ﻿using System.Diagnostics;
-using Implementor.Reflection;
-using Implementor.Text;
-using Implementor.Utilities;
 
 namespace Implementor;
 
@@ -18,6 +15,8 @@ public class ImplementationBuilder
     public INamedTypeSymbol TypeSymbol { get; }
     public AttributeData ImplementAttributeData { get; }
 
+    private string? _className;
+    
     private readonly List<FieldSignature> _fields = new(0);
     private readonly List<PropertySignature> _properties = new(0);
     private readonly List<EventSignature> _events = new(0);
@@ -38,7 +37,7 @@ public class ImplementationBuilder
     {
         var propertySignature = PropertySignature.Create(propertySymbol)!;
         // We're implementing this
-        propertySignature.Keywords.Remove("abstract");
+        propertySignature.Keywords &= ~Keywords.Abstract;
         var fieldName = Naming.GetFieldName(propertySymbol);
         var fieldSignature = new FieldSignature
         {
@@ -47,7 +46,7 @@ public class ImplementationBuilder
             ValueType = propertySignature.ValueType,
         };
         if (propertySignature.Setter is null)
-            fieldSignature.Keywords.Add("readonly");
+            fieldSignature.Keywords |= Keywords.Readonly;
         propertySignature.BackingField = fieldSignature;
 
         _fields.Add(fieldSignature);
@@ -117,9 +116,29 @@ public class ImplementationBuilder
     private void WriteConstructors(CodeBuilder codeBuilder)
     {
         // Look for required fields
-        var requiredFields = _fields.Where(f => f.Keywords.Contains("readonly")).ToList();
+        var requiredFields = _fields.Where(f => f.Keywords.HasFlag(Keywords.Readonly)).ToList();
+        
+        // Always at least this constructor
+        codeBuilder.Append("public ").Append(_className).Append('(')
+            .Delimit(", ", requiredFields, static (cb, field) =>
+            {
+                cb.Append(field.ValueType)
+                    .Append(' ')
+                    .Append(Naming.GetVariableName(field.Name));
+            }).Append(')').NewLine()
+            .BracketBlock(ib => ib
+                .Delimit(static b => b.NewLine(), requiredFields, static (cb, field) =>
+                {
+                    cb.Append(field.Name)
+                        .Append(" = ")
+                        .Append(Naming.GetVariableName(field.Name))
+                        .Append(';');
+                }));
+
         // Then optional fields
-        var optionalFields = _fields.Where(f => !f.Keywords.Contains("readonly")).ToList();
+        var optionalFields = _fields.Where(f => !f.Keywords.HasFlag(Keywords.Readonly)).ToList();
+        
+        
     }
 
     private void WriteMethods(CodeBuilder codeBuilder)
@@ -145,7 +164,7 @@ public class ImplementationBuilder
 
         string @namespace = TypeSymbol.GetFqNamespace();
         string interfaceName = TypeSymbol.Name;
-        string className = Naming.GetImplementationName(interfaceName);
+        _className = Naming.GetImplementationName(interfaceName);
 
 
         using var fileBuilder = new CSharpFileBuilder();
@@ -154,7 +173,7 @@ public class ImplementationBuilder
             .Namespace(@namespace)
             .Code
             .Append($$"""
-                      public class {{className}} : {{interfaceName}}
+                      public class {{_className}} : {{interfaceName}}
                       {
                           {{(CBA)WriteFields}}
                           {{(CBA)WriteProperties}}
@@ -167,6 +186,6 @@ public class ImplementationBuilder
         string code = fileBuilder.GetSourceCode();
         Console.Clear();
         Console.WriteLine(code);
-        return new(@namespace, interfaceName, className, code, Array.Empty<Type>());
+        return new(@namespace, interfaceName, _className, code, Array.Empty<Type>());
     }
 }

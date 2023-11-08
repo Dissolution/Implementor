@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Implementor.Tests", "tests\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleTester", "consoleapp\ConsoleTester.csproj", "{FFD357A5-9E9A-47E3-B973-783BB2AD2846}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jay.SourceGen", "..\Jay\Jay.SourceGen\src\Jay.SourceGen.csproj", "{B4CE3F41-8D21-4EB5-813C-4A03A5A0EC75}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{FFD357A5-9E9A-47E3-B973-783BB2AD2846}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FFD357A5-9E9A-47E3-B973-783BB2AD2846}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FFD357A5-9E9A-47E3-B973-783BB2AD2846}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4CE3F41-8D21-4EB5-813C-4A03A5A0EC75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4CE3F41-8D21-4EB5-813C-4A03A5A0EC75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4CE3F41-8D21-4EB5-813C-4A03A5A0EC75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4CE3F41-8D21-4EB5-813C-4A03A5A0EC75}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
