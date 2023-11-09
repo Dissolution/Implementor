@@ -1,12 +1,14 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using Microsoft.CodeAnalysis.Text;
-using static Implementor.AttributeSource;
 
 namespace Implementor;
 
 [Generator(LanguageNames.CSharp)]
 public sealed class ImplementationsGenerator : IIncrementalGenerator
 {
+    private const string IMPLEMENTATION_ATTRIBUTE_FULLY_QUALIFIED_NAME = SourceCode.ImplementAttribute.FullyQualifiedName;
+    
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
 #if DEBUG
@@ -15,13 +17,13 @@ public sealed class ImplementationsGenerator : IIncrementalGenerator
         //     Debugger.Launch();
         // }
 
-        //Debugger.Break();
+        Debugger.Break();
 #endif
 
         // Filter to all type declarations with our Implement attribute
         var typeDeclarations = context.SyntaxProvider
             .ForAttributeWithMetadataName(
-                fullyQualifiedMetadataName: ImplementAttribute.FullyQualifiedName,
+                fullyQualifiedMetadataName: IMPLEMENTATION_ATTRIBUTE_FULLY_QUALIFIED_NAME,
                 predicate: static (syntaxNode, _) => syntaxNode is TypeDeclarationSyntax,
                 transform: static (ctx, _) => (TypeDeclarationSyntax)ctx.TargetNode)
             .Where(t => t is not null)!;
@@ -51,10 +53,10 @@ public sealed class ImplementationsGenerator : IIncrementalGenerator
 
         // Get the symbol for ImplementAttribute
         var implementAttributeSymbol = compilation
-            .GetTypesByMetadataName(ImplementAttribute.FullyQualifiedName)
+            .GetTypesByMetadataName(IMPLEMENTATION_ATTRIBUTE_FULLY_QUALIFIED_NAME)
             .FirstOrDefault();
         if (implementAttributeSymbol is null)
-            throw new InvalidOperationException($"Could not find {ImplementAttribute.FullyQualifiedName}");
+            throw new InvalidOperationException($"Could not find {IMPLEMENTATION_ATTRIBUTE_FULLY_QUALIFIED_NAME}");
 
         // As per several examples, we need a distinct list or a grouping on SyntaxTree
         // I'm going with System.Text.Json's example
@@ -85,11 +87,11 @@ public sealed class ImplementationsGenerator : IIncrementalGenerator
                 // Find this type's exact ImplementAttribute
                 AttributeData? implementAttributeData = typeSymbol
                     .GetAttributes()
-                    .FirstOrDefault(attr => string.Equals(attr.AttributeClass?.GetFullName(), ImplementAttribute.FullyQualifiedName));
+                    .FirstOrDefault(attr => string.Equals(attr.AttributeClass?.GetFullName(), IMPLEMENTATION_ATTRIBUTE_FULLY_QUALIFIED_NAME));
 
                 if (implementAttributeData is null)
                 {
-                    throw new InvalidOperationException($"Could not get find our {ImplementAttribute.FullyQualifiedName}");
+                    throw new InvalidOperationException($"Could not get find our {IMPLEMENTATION_ATTRIBUTE_FULLY_QUALIFIED_NAME}");
                 }
 
                 // Generate this type's implementation

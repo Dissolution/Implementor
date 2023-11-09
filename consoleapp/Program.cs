@@ -4,7 +4,7 @@ using ConsoleApp.Interfaces;
 using Implementor;
 
 //Test test = new();
-ITest? test = default!;//Implementation.OfITest();
+ITest? test = Implementation.OfITest();
 // test.Id = 147;
 // string str = test.Id.ToString();
 // bool eq = test.Equals(new FakeTest() { Id = 147, Name = "Air" });
@@ -15,8 +15,8 @@ Debugger.Break();
 
 // Nothing, for now...
 
-Console.WriteLine("Press Enter to quit");
-Console.ReadLine();
+//Console.WriteLine("Press Enter to quit");
+//Console.ReadLine();
 return 0;
 
 
