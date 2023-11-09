@@ -1,8 +1,8 @@
-﻿using ConsoleTester.Interfaces;
+﻿using ConsoleApp.Interfaces;
 
-namespace ConsoleTester.Implementations;
+namespace ConsoleApp.Implementations;
 
-public class ManualImplementation_Test : ITest
+public class ManualImplementationTest : ITest
 {
     private int _id;
     private string? _name;
@@ -18,7 +18,7 @@ public class ManualImplementation_Test : ITest
         set => _name = value;
     }
 
-    public ManualImplementation_Test()
+    public ManualImplementationTest()
     {
         
     }
