@@ -1,10 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Implementor", "src\Implementor.csproj", "{60067CE8-0E60-4088-A6EA-D7C9A9995CFA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Implementor", "Implementor\Implementor.csproj", "{60067CE8-0E60-4088-A6EA-D7C9A9995CFA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Implementor.Tests", "tests\Implementor.Tests.csproj", "{9C835E98-551B-4D9A-AC5B-885279F5E101}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleTester", "consoleapp\ConsoleTester.csproj", "{FFD357A5-9E9A-47E3-B973-783BB2AD2846}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "consoleapp\ConsoleApp.csproj", "{FFD357A5-9E9A-47E3-B973-783BB2AD2846}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jay.SourceGen", "..\Jay\Jay.SourceGen\src\Jay.SourceGen.csproj", "{B4CE3F41-8D21-4EB5-813C-4A03A5A0EC75}"
 EndProject
@@ -18,10 +16,6 @@ Global
 		{60067CE8-0E60-4088-A6EA-D7C9A9995CFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{60067CE8-0E60-4088-A6EA-D7C9A9995CFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{60067CE8-0E60-4088-A6EA-D7C9A9995CFA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9C835E98-551B-4D9A-AC5B-885279F5E101}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9C835E98-551B-4D9A-AC5B-885279F5E101}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9C835E98-551B-4D9A-AC5B-885279F5E101}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9C835E98-551B-4D9A-AC5B-885279F5E101}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FFD357A5-9E9A-47E3-B973-783BB2AD2846}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FFD357A5-9E9A-47E3-B973-783BB2AD2846}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FFD357A5-9E9A-47E3-B973-783BB2AD2846}.Release|Any CPU.ActiveCfg = Release|Any CPU

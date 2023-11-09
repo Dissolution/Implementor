@@ -136,7 +136,7 @@ public class ImplementationBuilder
                 }));
 
         // Then optional fields
-        var optionalFields = _fields.Where(f => !f.Keywords.HasFlag(Keywords.Readonly)).ToList();
+        //var optionalFields = _fields.Where(f => !f.Keywords.HasFlag(Keywords.Readonly)).ToList();
         
         
     }

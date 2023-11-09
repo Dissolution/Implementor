@@ -1,8 +1,6 @@
-﻿using Implementor;
+﻿namespace ConsoleApp.Interfaces;
 
-namespace ConsoleTester.Interfaces;
-
-[Implement]
+//[Implement]
 // [Entity]
 public interface ITest
 {

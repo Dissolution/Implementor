@@ -1,6 +1,6 @@
 ﻿// #nullable enable
 //
-// namespace ConsoleTester.Implementations;
+// namespace ConsoleApp.Implementations;
 //
 // [AttributeUsage(AttributeTargets.Interface)]
 // public sealed class EntityAttribute : Attribute

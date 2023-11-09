@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Text;
+﻿using System.Text;
 using Microsoft.CodeAnalysis.Text;
 using static Implementor.AttributeSource;
 
@@ -64,7 +63,7 @@ public sealed class ImplementationsGenerator : IIncrementalGenerator
             token.ThrowIfCancellationRequested();
             SyntaxTree syntaxTree = group.Key;
             SemanticModel semanticModel = compilation.GetSemanticModel(syntaxTree);
-            CompilationUnitSyntax unitSyntax = (syntaxTree.GetRoot(token) as CompilationUnitSyntax)!;
+            //CompilationUnitSyntax unitSyntax = (syntaxTree.GetRoot(token) as CompilationUnitSyntax)!;
 
             // We're building Implementation
             using var fileBuilder = new CSharpFileBuilder()
@@ -116,7 +115,7 @@ public sealed class ImplementationsGenerator : IIncrementalGenerator
                     }
                     """);
             
-            var icode = fileBuilder.GetSourceCode();
+            //var icode = fileBuilder.GetSourceCode();
             
             sourceProductionContext.AddSource(
                 hintName: "Implementor.Implementation.g.cs",

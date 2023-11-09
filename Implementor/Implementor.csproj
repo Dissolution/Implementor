@@ -5,6 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
 
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
         <IncludeBuildOutput>false</IncludeBuildOutput>
         <IsRoslynComponent>true</IsRoslynComponent>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>

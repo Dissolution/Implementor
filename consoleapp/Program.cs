@@ -1,15 +1,17 @@
-﻿using System.Diagnostics;
+﻿// ReSharper disable RedundantUsingDirective
+using System.Diagnostics;
+using ConsoleApp.Interfaces;
 using Implementor;
-using ConsoleTester.Interfaces;
-//
-// //Test test = new();
-// ITest test = Implementation.OfITest();
+
+//Test test = new();
+ITest? test = default!;//Implementation.OfITest();
 // test.Id = 147;
 // string str = test.Id.ToString();
 // bool eq = test.Equals(new FakeTest() { Id = 147, Name = "Air" });
 // Console.WriteLine($"Id = {str}, Eq(147,Air) = {eq}");
-//
-// Debugger.Break();
+
+Console.WriteLine(test);
+Debugger.Break();
 
 // Nothing, for now...
 
